@@ -1,6 +1,7 @@
 
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.StringTokenizer;
 
 import processing.core.PApplet;
@@ -26,9 +27,13 @@ public class TwitterBox
 	public String first = "";
 	protected String second  = "";
 	private String colourToken = "white";
+	Tweet chirp;
+	private long created;
 	
 	public TwitterBox(Tweet tweet, PApplet p)
 	{		
+		created = Calendar.getInstance().getTimeInMillis();
+		this.chirp = tweet;
 		this.p = p;
 		tweetText = p.loadFont("Verdana-20.vlw");
 		processTweet(tweet.getText());
@@ -36,30 +41,25 @@ public class TwitterBox
 		MediaEntity[] mediaEntities = tweet.getMediaEntities();
 		if(mediaEntities != null)
 		{
-			System.out.println("**************************************** " + mediaEntities[0].getMediaURLHttps().toString());
+			System.out.println("************ " + mediaEntities[0].getMediaURLHttps().toString());
 			this.tweetImage = p.loadImage(mediaEntities[0].getMediaURLHttps().toString(),"jpg");
 		}
 		x = 0;
 		y = 0;
 	}
 
+	public long getTime()
+	{
+		return created;
+	}
+	
+	public Tweet getTweet()
+	{
+		return chirp;
+	}
+	
 	private void processTweet(String input)
 	{	
-		
-//		StringTokenizer st = new StringTokenizer(input, " ");
-		
-//		String temp = "";
-//		while(st.hasMoreTokens())
-//		{
-//			String tempTemp = st.nextToken();
-//			
-//			partyTime(tempTemp);
-//			sanatize(tempTemp);
-//			setColour(tempTemp);
-//			temp = tempTemp + " " + temp;
-//		}
-//		first = input;
-		
 		StringTokenizer st = new StringTokenizer(input, " ");
 		String temp = "";
 		while(st.hasMoreTokens())
@@ -121,6 +121,10 @@ public class TwitterBox
 		}
 	}
 	
+	public void resetTweet(int newY){
+		this.y = newY;
+	}
+	
 	public void partyTime(String party)
 	{
 		party = party.trim();
@@ -130,12 +134,12 @@ public class TwitterBox
 		}
 		if(party.equalsIgnoreCase("catparty") || party.equalsIgnoreCase("#catparty"))
 		{
-			for(int i = 0 ; i < 10 ; i++)
+			for(int i = 0 ; i < 1 ; i++)
 				Calling.PICS.add(new FallingImage(p.loadImage("fallingcat.png","png"), p));
 		}
 		if(party.equalsIgnoreCase("anvilparty") || party.equalsIgnoreCase("#anvilparty"))
 		{
-			for(int i = 0 ; i < 10 ; i++)
+			for(int i = 0 ; i < 1 ; i++)
 				Calling.PICS.add(new FallingImage(p.loadImage("anvil.png","png"), p));
 		}
 		if(party.equalsIgnoreCase("dog") || party.equalsIgnoreCase("#dog"))
@@ -166,9 +170,9 @@ public class TwitterBox
 		{	
 			Calling.PICS.add(new FallingImage(p.loadImage("madmen.png","png"), p));
 		}
-		if(party.equalsIgnoreCase("pigsfly") || party.equalsIgnoreCase("#pigsfly"))
+		if(party.equalsIgnoreCase("pigsfly") || party.equalsIgnoreCase("#pigsfly") || party.equalsIgnoreCase("#whenpigsfly"))
 		{	
-			for(int i = 0 ; i < 3 ; i++)
+			for(int i = 0 ; i < 1 ; i++)
 				Calling.FLYING_PICS.add(new FlyingImage(p.loadImage("pigsFly.png","png"), p));
 		}
 		if(party.equalsIgnoreCase("sharkparty") || party.equalsIgnoreCase("#shark"))

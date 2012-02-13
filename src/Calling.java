@@ -2,11 +2,14 @@
 
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import processing.core.PApplet;
 import processing.core.PImage;
 
-public class Calling extends PApplet{
+public class Calling extends PApplet
+{
 
 	private static final long serialVersionUID = 1L;
 	private PImage bannerImage;
@@ -21,50 +24,25 @@ public class Calling extends PApplet{
 	static Queue<FallingImage> PICS = new LinkedList<FallingImage>();
 	static Queue<FlyingImage> FLYING_PICS = new LinkedList<FlyingImage>();
 	private Queue<TwitterBox> chirps = new LinkedList<TwitterBox>();
-	public static Queue<TwitterBox> TWEETS = new LinkedList<TwitterBox>();
 	public boolean censor = false;
-		
+//	public static boolean WAIT = false;
 	TwitterThread tweetThread;
-	TwitterThread2 tweetThread2;
-	TwitterThread3 tweetThread3;
-	TwitterThread4 tweetThread4;
+	public static int TWEET_COUNT = 0;
 
 	int tweetCount = 0;
 	
 	public void setup()
-	{
+	{	
 		tweetThread = new TwitterThread(this);
 		tweetThread.start();
-		tweetThread2 = new TwitterThread2(this);
-		tweetThread2.start();
-		tweetThread3 = new TwitterThread3(this);
-		tweetThread3.start();
-		tweetThread4 = new TwitterThread4(this);
-		tweetThread4.start();
+		
 		bannerImage = loadImage("m2o_banner2.png","png");
 		restricted = loadImage("oops.jpg","jpg");
 		frameRate(30);		
 		size(width, height);
 	}//end setup
 	
-	public void removeDuplicates(TwitterBox tester)
-	{
-		TwitterBox temp;
-		
-		for(int i = 0 ; i < chirps.size() ; i++)
-		{
-			temp = chirps.poll();
-			if(temp.first.equals(tester.first))
-			{
-				temp = null;
-				System.out.println("Removing duplicate");
-			}
-			else
-			{
-				chirps.add(temp);
-			}
-		}
-	}
+
 	
 	public void draw()
 	{
@@ -72,17 +50,17 @@ public class Calling extends PApplet{
 
 		stroke(250,250,250);
 		fill(250,250,250);
-				
+	
 		if(lastY <= 0)
 		{
 			TwitterBox temp;
-			temp = TWEETS.poll();
-			//removeDuplicates(temp);
+			temp = Shared.TWEETS.poll();
+			
 			System.out.println("Getting tweet...");
 
 			if(temp != null)
 			{
-				chirps.peek();
+				//chirps.peek();
 				if(temp.getImageSize() > 0)
 				{
 					temp.setY(-1 * temp.getImageSize());
@@ -105,14 +83,26 @@ public class Calling extends PApplet{
 			lastY--;
 		}
 		
+		//System.out.println("* Chirps size: " + chirps.size());
+		
 		for(int i = 0 ; i < chirps.size() ; i++)
 		{
 			TwitterBox chirp = chirps.poll();
-			
+		
 			if(chirp.getY() > height)
 			{
-				chirp = null;
-				tweetCount++;
+//				if(Shared.TWEETS.size() > 1)
+//				{	
+					chirp = null;
+					System.out.println("****************************************************************************************************  Setting to null: + " + chirps.size());
+//				}
+//				else
+//				{
+//					chirp.setY(0);
+//					Shared.TWEETS.add(chirp);
+//				}
+				System.out.println("Chirp count: " + chirps.size());
+				System.out.println("TWEETS count: " + Shared.TWEETS.size());
 			}
 			else
 			{
@@ -155,6 +145,12 @@ public class Calling extends PApplet{
 		{
 			image(restricted, 100, 120);
 		}
+		
+		if(Shared.TWEETS.size() > 50)
+		{
+			Shared.TWEETS = new LinkedList<TwitterBox>();
+		}
+		//WAIT = false;
 
 	}//end draw
 	
@@ -165,7 +161,7 @@ public class Calling extends PApplet{
 	
 	public void mousePressed() 
 	{		
-		for(TwitterBox chirp : TWEETS)
+		for(TwitterBox chirp : Shared.TWEETS)
 		{
 			if(chirp.getY() < mouseY + 50 && chirp.getY() > mouseY - 50)
 			{
@@ -234,6 +230,10 @@ public class Calling extends PApplet{
 		if(key == 'n')
 		{
 			 PICS.add(new FallingImage(loadImage("squirrel.png","png"), this));
+		}
+		if(key == 'q')
+		{
+			 Shared.TWEETS = new LinkedList<TwitterBox>();
 		}
 		
 		if(key == 'e')

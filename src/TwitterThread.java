@@ -1,4 +1,6 @@
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
 
 import processing.core.PApplet;
 import twitter4j.Query;
@@ -22,6 +24,10 @@ public class TwitterThread extends Thread{
 	private TwitterBox inThePipe;
 	private PApplet p;
 	
+	private int topicIndex = 0;
+	private ArrayList<String> topics = new ArrayList<String>();
+	private ArrayList<String> lastTopics = new ArrayList<String>();
+	
 	public TwitterThread(PApplet p)
 	{
 		this.p = p;
@@ -33,50 +39,96 @@ public class TwitterThread extends Thread{
 		System.out.println("*** Inside Thread 1 ***");
 		myTwitter = new TwitterFactory().getInstance();
 		myTwitter.setOAuthConsumer("DataVisual", "v1su@l");	
-		query = new Query(trendTopic);
 
+		topics.add("m2o");
+		topics.add("illuminateyaletown");
+		topics.add("iyaletown");
+		topics.add("cityandslope");
+		topics.add("blueprintevents");
+		
+//		topics.add("#Thingsthatpissmeoffinthemorning");
+//		topics.add("#twitterbirsokakolsaydi");
+//		topics.add("#BabyHorse");
+//		topics.add("Romney 39");
+		
+		for(String setup : topics)
+		{
+			lastTopics.add("");
+		}
+		
 		while(true)
 		{
-			try {
-				Thread.sleep(2500);
-				getTweet();
-				
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			for(int i = 0 ; i < topics.size() ; i++)
+			{
+				try 
+				{
+					Thread.sleep(800);
+					
+					getTweet(topics.get(i), i);
+					
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 		}
 	}
 	
-	
-	private TwitterBox getTweet() 
+	public void setNewTopic(String tweet)
 	{
-		query.setRpp(numTweets);	
+		
+	}
+	
+	public void removeExisitingTopic(String tweet)
+	{
+		
+	}
+	
+	private void getTweet(String topic, int topicIndex) 
+	{
+		query = new Query(topic);
+		query.setRpp(3);	
 		try 
 		{
 			result = myTwitter.search(query);
-			List<Tweet> tweets = result.getTweets();			
+			List<Tweet> tweets = result.getTweets();
+			
+			System.out.println("--- Number of returned tweets: " + tweets.size());
+			
 			for(Tweet t : tweets)
 			{
-				if(!t.getText().equals(lastTweet))
-				{
-					inThePipe = new TwitterBox(t, p);
-					//chirps.add(inThePipe);
-					Calling.TWEETS.add(inThePipe);
-					lastTweet = t.getText();
-					System.out.println(">>>>>>>>>>>>>>>   " + t.getText());
-					return inThePipe;
+				int notDuplicate = -1;
+				
+					System.out.println("Adding new tweet for topic: " + topics.get(topicIndex));
+					
+					for(TwitterBox box : Shared.TWEETS)
+					{
+						if(box.chirp.getText().equals(t.getText()))
+						{
+							notDuplicate++;
+						}
+					}
+					
+					if(notDuplicate < 0)
+					{	
+						inThePipe = new TwitterBox(t, p);
+						System.out.println("$$$ Adding unique item");
+						Shared.TWEETS.add(inThePipe);
+						lastTopics.set(topicIndex, t.getText());
+						Calling.TWEET_COUNT++;
+						System.out.println("Tweet Count: " + Calling.TWEET_COUNT + "  TWEETS: " + Shared.TWEETS.size() + "  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>   " + t.getText());
+					}
+					else
+					{
+						System.out.println("$$$ Disgarding item");
+						inThePipe = null;
+					}
 				} 
-				else
-				{
-					lastTweet = t.getText();
-				}
-			}
 		} 
 		catch (TwitterException e) 
 		{
 			e.printStackTrace();
 		}
-		return null;
+	//	return null;
 	}
 }
