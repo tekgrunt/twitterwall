@@ -3,7 +3,12 @@ import java.util.Random;
 import processing.core.PApplet;
 import processing.core.PImage;
 
-
+/**
+ * This is the image class that flies across the screen sideways... I basically duplicated the 
+ * falling class and changed some of the magic number due to time constraints. There should 
+ * only really be one class for any image moving across the screen and we should be able to send 
+ * them in any direction we want.
+ */
 public class FlyingImage 
 {
 	private PImage fallingImage = new PImage();;

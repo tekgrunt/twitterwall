@@ -7,11 +7,15 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import processing.core.PApplet;
 import processing.core.PImage;
-
+/**
+ * This is the main class. Processing provides a framework with a couple of main methods. These
+ * methods are included in this class and explained below.
+ * 
+ * @author christopherluft
+ */
+@SuppressWarnings("serial")
 public class Calling extends PApplet
 {
-
-	private static final long serialVersionUID = 1L;
 	private PImage bannerImage;
 	private PImage restricted;
 
@@ -21,16 +25,28 @@ public class Calling extends PApplet
 	
 	private int lastY = 0;
 	
+	/*
+	 * I have a bunch of queues here for the different items that move across the screen.
+	 * Once they have moved across the screen we set them to null and the GC picks them up.
+	 * I think it is the GC that is causing the occasional jerk/freeze that happens.
+	 * I am not sure if there is anything that can be done to make this better but it would
+	 * be a big win. 
+	 * 
+	 */
 	static Queue<FallingImage> PICS = new LinkedList<FallingImage>();
 	static Queue<FlyingImage> FLYING_PICS = new LinkedList<FlyingImage>();
 	private Queue<TwitterBox> chirps = new LinkedList<TwitterBox>();
 	public boolean censor = false;
-//	public static boolean WAIT = false;
 	TwitterThread tweetThread;
 	public static int TWEET_COUNT = 0;
 
+	//I think I was just using this to get a rough count of how many Tweets had run... should probably go to sleep.
 	int tweetCount = 0;
 	
+	/*
+	 * The setup() function is a processing method that runs once when the application is booted.
+	 * Instantiate objects needed for the lifetime of the app and load images here.
+	 */
 	public void setup()
 	{	
 		tweetThread = new TwitterThread(this);
@@ -43,7 +59,10 @@ public class Calling extends PApplet
 	}//end setup
 	
 
-	
+	/*
+	 * The draw() function is a loop that runs at a defined frame rate. During each loop the screen is 
+	 * re-drawn. Each loop you have to setup the background colour, text colour, etc like layers.
+	 */
 	public void draw()
 	{
 		background(1);		
@@ -60,7 +79,6 @@ public class Calling extends PApplet
 
 			if(temp != null)
 			{
-				//chirps.peek();
 				if(temp.getImageSize() > 0)
 				{
 					temp.setY(-1 * temp.getImageSize());
@@ -83,24 +101,15 @@ public class Calling extends PApplet
 			lastY--;
 		}
 		
-		//System.out.println("* Chirps size: " + chirps.size());
-		
 		for(int i = 0 ; i < chirps.size() ; i++)
 		{
 			TwitterBox chirp = chirps.poll();
 		
 			if(chirp.getY() > height)
 			{
-//				if(Shared.TWEETS.size() > 1)
-//				{	
-					chirp = null;
-					System.out.println("****************************************************************************************************  Setting to null: + " + chirps.size());
-//				}
-//				else
-//				{
-//					chirp.setY(0);
-//					Shared.TWEETS.add(chirp);
-//				}
+				chirp = null;
+				System.out.println("Setting to null: + " + chirps.size());
+
 				System.out.println("Chirp count: " + chirps.size());
 				System.out.println("TWEETS count: " + Shared.TWEETS.size());
 			}

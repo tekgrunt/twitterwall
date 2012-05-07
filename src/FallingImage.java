@@ -3,7 +3,15 @@ import java.util.Random;
 import processing.core.PApplet;
 import processing.core.PImage;
 
-
+/**
+ * This is the original moving image class. It gets updated the same way the tweets do and
+ * handles its own position on the screen. The other image class was a cut/paste last minute
+ * addition and the images should all be wrapped in one class that takes a direction. Also need to
+ * move the images into their own source folder instead of the main.
+ * 
+ * @author christopherluft
+ *
+ */
 public class FallingImage 
 {
 	private PImage fallingImage = new PImage();;

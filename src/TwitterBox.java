@@ -11,7 +11,9 @@ import twitter4j.MediaEntity;
 import twitter4j.Tweet;
 
 /**
- * The box containing photo and tweet being animated down the screen
+ * The box containing photo and tweet being animated down the screen. The object is responsible for
+ * its own position adn updating it. The array of these objects is iterated through and updated
+ * each time it is touched.
  * 
  * @author christopherluft
  *
@@ -39,9 +41,10 @@ public class TwitterBox
 		processTweet(tweet.getText());
 		this.userImage = p.loadImage(tweet.getProfileImageUrl(),"png");
 		MediaEntity[] mediaEntities = tweet.getMediaEntities();
+		
 		if(mediaEntities != null)
 		{
-			System.out.println("************ " + mediaEntities[0].getMediaURLHttps().toString());
+			System.out.println("** " + mediaEntities[0].getMediaURLHttps().toString());
 			this.tweetImage = p.loadImage(mediaEntities[0].getMediaURLHttps().toString(),"jpg");
 		}
 		x = 0;
@@ -66,13 +69,16 @@ public class TwitterBox
 		{
 			 temp = st.nextToken() + " " + temp;
 		}
-		//first = input;//temp;
+
 		ArrayList<String> firstLine = new ArrayList<String>();
 		ArrayList<String> secondLine = new ArrayList<String>();
 		char[] chars = input.toCharArray();
 		int charCount = 0;
 		String word = "";
 		
+		/*
+		 * This is some horrendous string parsing I had to do to my own word wrap
+		 */
 		for(char token : chars)
 		{
 			charCount++;
@@ -125,6 +131,9 @@ public class TwitterBox
 		this.y = newY;
 	}
 	
+	/*
+	 * The easter egg detector for cat party and friends
+	 */
 	public void partyTime(String party)
 	{
 		party = party.trim();
@@ -182,6 +191,12 @@ public class TwitterBox
 		}
 	}
 	
+	/*
+	 * The easter egg detector for changing text colour. The behaviour for this is not 100%
+	 * when a user was changing the text colour it would flicker between some of the tweets  
+	 * and effect all tweets on the screen while the original tweet was running... it kind of 
+	 * looks ok as is it functions and I would not make this a high priority. 
+	 */
 	public void setColour(String token)
 	{
 		token = token.trim();
@@ -223,7 +238,11 @@ public class TwitterBox
 			colourToken = "orange";
 		}
 	}
-	
+	/*
+	 * Continued from above... I think the problem with this colour setting is that it 
+	 * is setting the global Processing stroke and fill and having this reset in another tweet
+	 * during the loop as we flip between them.
+	 */
 	public void colourTweet(String token)
 	{	
 		if(token.equalsIgnoreCase("blue"))
@@ -267,7 +286,9 @@ public class TwitterBox
 			this.p.fill(247,167,12);
 		}
 	}
-	
+	/*
+	 * Checks for common swear words and replaces them with fitting substitutes.
+	 */
 	public String sanatize(String token)
 	{
 		token.trim();
@@ -283,6 +304,10 @@ public class TwitterBox
 		return token;
 	}
 	
+	/*
+	 * In order to set the spacing for the various tweets when an image is posted
+	 * I grab the height and use it calcualting position.
+	 */
 	public int getImageSize()
 	{
 		if(tweetImage != null)
@@ -293,6 +318,9 @@ public class TwitterBox
 		return -1;
 	}
 	
+	/*
+	 * The object updates its own position on the screen during each loop - sorry for the magic numbers
+	 */
 	public void updateTwitterBox(PApplet p)
 	{
 		y += 1;
@@ -318,6 +346,11 @@ public class TwitterBox
 		}
 	}
 
+	/*
+	 * I think I had functionilty in the first iteration that if you clicked on a tweet or hit a specific key
+	 * when it was in the queue it would remove the text. Being able to manage the live stream of content would
+	 * be a big win... just trying to figure out how to do that is the challenge.
+	 */
 	public void killTweet()
 	{		
 		first="";
