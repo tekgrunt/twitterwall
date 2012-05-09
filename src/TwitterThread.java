@@ -46,7 +46,7 @@ public class TwitterThread extends Thread{
 	{
 		System.out.println("*** Inside Thread 1 ***");
 		myTwitter = new TwitterFactory().getInstance();
-		myTwitter.setOAuthConsumer("DataVisual", "v1su@l");	
+		myTwitter.setOAuthConsumer("DataVisual", "m2blowme2012");	
 
 		topics.add("bcama");
 //		topics.add("#Thingsthatpissmeoffinthemorning");
