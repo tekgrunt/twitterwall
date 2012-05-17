@@ -47,7 +47,10 @@ public class TwitterThread extends Thread{
 	{
 		this.p = p;
 		webService = new WebService();
-		dataConnection = new DataConnection();
+		if(Shared.LOCAL_DB_ENABLED)
+		{
+			dataConnection = new DataConnection();
+		}
 	}
 	
 	@Override
