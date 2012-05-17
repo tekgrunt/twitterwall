@@ -12,4 +12,5 @@ public class Shared
 {
 	public static Queue<TwitterBox> TWEETS = new LinkedList<TwitterBox>();
 	public static long FIRST = -1;
+	public static boolean LOCAL_DB_ENABLED = true;
 }

@@ -130,7 +130,10 @@ public class TwitterThread extends Thread{
 						
 						//this is where we are going to dump into the db
 						//webService.sendTweetData(t.getFromUserId(), t.getFromUser(), t.getText(), t.getProfileImageUrl(), t.getSource(), mediaEntry);
-						dataConnection.enterTweetData(new TweetData(t.getId(), t.getFromUser(), t.getText(), t.getProfileImageUrl(), t.getSource(), ""));
+						if(Shared.LOCAL_DB_ENABLED)
+						{
+							dataConnection.enterTweetData(new TweetData(t.getId(), t.getFromUser(), t.getText(), t.getProfileImageUrl(), t.getSource(), ""));
+						}
 						inThePipe = new TwitterBox(t, p);
 						System.out.println("*** Adding unique item");
 						Shared.TWEETS.add(inThePipe);
