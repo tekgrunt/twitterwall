@@ -7,6 +7,8 @@ import java.util.StringTokenizer;
 import processing.core.PApplet;
 import processing.core.PFont;
 import processing.core.PImage;
+import twitter.data.object.FallingImage;
+import twitter.data.object.FlyingImage;
 import twitter4j.MediaEntity;
 import twitter4j.Tweet;
 

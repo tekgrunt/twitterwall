@@ -7,6 +7,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import processing.core.PApplet;
 import processing.core.PImage;
+import twitter.data.object.FallingImage;
+import twitter.data.object.FlyingImage;
 /**
  * This is the main class. Processing provides a framework with a couple of main methods. These
  * methods are included in this class and explained below.

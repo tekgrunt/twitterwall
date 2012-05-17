@@ -1,14 +1,18 @@
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.locks.Lock;
 
 import processing.core.PApplet;
+import twitter.data.object.TweetData;
+import twitter.data.webservice.WebService;
 import twitter4j.Query;
 import twitter4j.QueryResult;
 import twitter4j.Tweet;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
+import twitterwall.data.connection.DataConnection;
+
+import com.mysql.jdbc.Connection;
 
 /**
  * I initially had the calls to get new Tweets in the main thread; however, on each call there 
@@ -25,6 +29,9 @@ public class TwitterThread extends Thread{
 	private QueryResult result;
 	private TwitterBox inThePipe;
 	private PApplet p;
+	private WebService webService; //<-- dead until I sort out what I was working on.
+	private DataConnection dataConnection;
+	private Connection conn;
 	
 	/*
 	 * The topics array lets us cycle through and poll more than one topic.
@@ -39,6 +46,8 @@ public class TwitterThread extends Thread{
 	public TwitterThread(PApplet p)
 	{
 		this.p = p;
+		webService = new WebService();
+		dataConnection = new DataConnection();
 	}
 	
 	@Override
@@ -48,7 +57,7 @@ public class TwitterThread extends Thread{
 		myTwitter = new TwitterFactory().getInstance();
 		myTwitter.setOAuthConsumer("DataVisual", "m2blowme2012");	
 
-		topics.add("bcama");
+		topics.add("schoolmemories");
 //		topics.add("#Thingsthatpissmeoffinthemorning");
 //		topics.add("#twitterbirsokakolsaydi");
 //		topics.add("#BabyHorse");
@@ -117,6 +126,11 @@ public class TwitterThread extends Thread{
 					
 					if(notDuplicate < 0)
 					{	
+						String mediaEntry = "";
+						
+						//this is where we are going to dump into the db
+						//webService.sendTweetData(t.getFromUserId(), t.getFromUser(), t.getText(), t.getProfileImageUrl(), t.getSource(), mediaEntry);
+						dataConnection.enterTweetData(new TweetData(t.getId(), t.getFromUser(), t.getText(), t.getProfileImageUrl(), t.getSource(), ""));
 						inThePipe = new TwitterBox(t, p);
 						System.out.println("*** Adding unique item");
 						Shared.TWEETS.add(inThePipe);

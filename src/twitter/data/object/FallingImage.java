@@ -1,3 +1,4 @@
+package twitter.data.object;
 import java.util.Random;
 
 import processing.core.PApplet;
