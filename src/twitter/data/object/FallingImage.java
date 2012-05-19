@@ -1,7 +1,6 @@
 package twitter.data.object;
 import java.util.Random;
 
-import processing.core.PApplet;
 import processing.core.PImage;
 
 /**
@@ -13,30 +12,27 @@ import processing.core.PImage;
  * @author christopherluft
  *
  */
-public class FallingImage 
+public class FallingImage implements IMovingImage
 {
-	private PImage fallingImage = new PImage();;
-	private PApplet p;
+	private PImage image = new PImage();
 	private int x;
 	private int y;
 	private int speed;
 
-	public FallingImage(PImage fallingImage, PApplet p)
+	public FallingImage(PImage image)
 	{
 		Random randomGenerator = new Random();
-		this.fallingImage = fallingImage;
-		this.p = p;
-		y = -1 * fallingImage.height;
+		this.image = image;
+		y = -1 * image.height;
 		x = randomGenerator.nextInt(1024);
 		speed = 1 + randomGenerator.nextInt(4);
 	}
 	
-	public FallingImage(PImage fallingImage, PApplet p, String noMove)
+	public FallingImage(PImage image, String noMove)
 	{
 		Random randomGenerator = new Random();
-		this.fallingImage = fallingImage;
-		this.p = p;
-		y = -1 * fallingImage.height;
+		this.image = image;
+		y = -1 * image.height;
 		x = 0;
 		
 		if(noMove.equals("random"))
@@ -48,10 +44,14 @@ public class FallingImage
 			speed = 1;// + randomGenerator.nextInt(4);
 		}
 	}
-	
-	public void updateImage()
+
+	public PImage getImage()
 	{
-		p.image(fallingImage,x,y);
+		return image;
+	}
+	
+	public void applyUpdate()
+	{
 		y += speed;
 	}
 

@@ -1,7 +1,6 @@
 import java.util.ArrayList;
 import java.util.List;
 
-import processing.core.PApplet;
 import twitter.data.object.TweetData;
 import twitter.data.webservice.WebService;
 import twitter4j.Query;
@@ -22,13 +21,13 @@ import com.mysql.jdbc.Connection;
  * @author christopherluft
  *
  */
-public class TwitterThread extends Thread{
-
+public class TwitterThread extends Thread
+{
 	private Twitter myTwitter;
 	private Query query;
 	private QueryResult result;
 	private TwitterBox inThePipe;
-	private PApplet p;
+	private Calling p;
 	private WebService webService; //<-- dead until I sort out what I was working on.
 	private DataConnection dataConnection;
 	private Connection conn;
@@ -37,13 +36,8 @@ public class TwitterThread extends Thread{
 	 * The topics array lets us cycle through and poll more than one topic.
 	 */
 	private ArrayList<String> topics = new ArrayList<String>();
-	/*
-	 * I can't rmember exactly but I think use this array to check to make sure any of the new items 
-	 * coming in are already in the array
-	 */
-	private ArrayList<String> lastTopics = new ArrayList<String>();
-	
-	public TwitterThread(PApplet p)
+
+	public TwitterThread(Calling p)
 	{
 		this.p = p;
 		webService = new WebService();
@@ -60,17 +54,11 @@ public class TwitterThread extends Thread{
 		myTwitter = new TwitterFactory().getInstance();
 		myTwitter.setOAuthConsumer("DataVisual", "m2blowme2012");	
 
-		topics.add("schoolmemories");
+		topics.add("#ifonlyyoucould");
 //		topics.add("#Thingsthatpissmeoffinthemorning");
 //		topics.add("#twitterbirsokakolsaydi");
 //		topics.add("#BabyHorse");
 //		topics.add("Romney 39");
-		
-		//can't remember why this is here
-		for(String setup : topics)
-		{
-			lastTopics.add("");
-		}
 		
 		while(true)
 		{
@@ -78,17 +66,23 @@ public class TwitterThread extends Thread{
 			{
 				try 
 				{
-					Thread.sleep(800);
+					Thread.sleep(2000);
 					
-					getTweet(topics.get(i), i);
-					
-				} catch (InterruptedException e) {
+					if(Shared.TWEETS.size() < 20)
+					{
+						getTweet(topics.get(i), i);
+					}
+				} 
+				
+				catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
 		}
 	}
+	
+	private long filterSinceId = 0;
 	
 	/*
 	 * Basically I am just polling the Twitter stream and pulling the top 3 items. This was a bit if a 
@@ -100,56 +94,39 @@ public class TwitterThread extends Thread{
 	 */
 	private void getTweet(String topic, int topicIndex) 
 	{
-		//creating the query for the given topic
+		// creating the query for the given topic
+		// setting the number of results we want
 		query = new Query(topic);
-		//setting the number of results we want
-		query.setRpp(3);	
+		query.setSinceId(filterSinceId);
+		query.setRpp(20);	
 		try 
 		{
 			//getting the tweets
 			result = myTwitter.search(query);
 			List<Tweet> tweets = result.getTweets();
 			
-			System.out.println("--- Number of returned tweets: " + tweets.size());
+			System.out.println("Query returned " + tweets.size());
 			
-			//cycling through the tweets to see if we grabbed any duplicates and if so dumping them 
 			for(Tweet t : tweets)
 			{
-				int notDuplicate = -1;
-				
-					System.out.println("Adding new tweet for topic: " + topics.get(topicIndex));
-					
-					for(TwitterBox box : Shared.TWEETS)
-					{
-						if(box.chirp.getText().equals(t.getText()))
-						{
-							notDuplicate++;
-						}
-					}
-					
-					if(notDuplicate < 0)
-					{	
-						String mediaEntry = "";
-						
-						//this is where we are going to dump into the db
-						//webService.sendTweetData(t.getFromUserId(), t.getFromUser(), t.getText(), t.getProfileImageUrl(), t.getSource(), mediaEntry);
-						if(Shared.LOCAL_DB_ENABLED)
-						{
-							dataConnection.enterTweetData(new TweetData(t.getId(), t.getFromUser(), t.getText(), t.getProfileImageUrl(), t.getSource(), ""));
-						}
-						inThePipe = new TwitterBox(t, p);
-						System.out.println("*** Adding unique item");
-						Shared.TWEETS.add(inThePipe);
-						lastTopics.set(topicIndex, t.getText());
-						Calling.TWEET_COUNT++;
-						System.out.println("Tweet Count: " + Calling.TWEET_COUNT + "  TWEETS: " + Shared.TWEETS.size() + "  >>>  " + t.getText());
-					}
-					else
-					{
-						System.out.println("*** Disgarding item");
-						inThePipe = null;
-					}
-				} 
+				filterSinceId = Math.max(t.getId(), filterSinceId);
+				System.out.println("FilterKey: " + filterSinceId + " " + t.getCreatedAt());
+			//	System.out.println("Adding new tweet for topic: " + topics.get(topicIndex));
+
+				String mediaEntry = "";
+
+				//this is where we are going to dump into the db
+				//webService.sendTweetData(t.getFromUserId(), t.getFromUser(), t.getText(), t.getProfileImageUrl(), t.getSource(), mediaEntry);
+				if(Shared.LOCAL_DB_ENABLED)
+				{
+					dataConnection.enterTweetData(new TweetData(t.getId(), t.getFromUser(), t.getText(), t.getProfileImageUrl(), t.getSource(), ""));
+				}
+				inThePipe = p.createTwitterBox(t);
+				//System.out.println("*** Adding unique item");
+				Shared.TWEETS.add(inThePipe);
+				Calling.TWEET_COUNT++;
+				System.out.println("Tweet Count: " + Calling.TWEET_COUNT + "  TWEETS: " + Shared.TWEETS.size() + "  >>>  " + t.getText());
+			} 
 		} 
 		catch (TwitterException e) 
 		{

@@ -1,7 +1,6 @@
 package twitter.data.object;
-import java.util.Random;
 
-import processing.core.PApplet;
+import java.util.Random;
 import processing.core.PImage;
 
 /**
@@ -10,34 +9,49 @@ import processing.core.PImage;
  * only really be one class for any image moving across the screen and we should be able to send 
  * them in any direction we want.
  */
-public class FlyingImage 
+public class FlyingImage implements IMovingImage
 {
-	private PImage fallingImage = new PImage();;
-	private PApplet p;
+	private PImage image;
 	private int y;
 	private int x;
+	private int count = 1;
+	private int maxCount = 20;
 	private int speed;
-
-	public FlyingImage(PImage fallingImage, PApplet p)
+private Random randomGenerator;
+	
+	public FlyingImage(PImage image)
 	{
-		Random randomGenerator = new Random();
-		this.fallingImage = fallingImage;
-		this.p = p;
-		x = -1 * fallingImage.width;
+		randomGenerator = new Random();
+		this.image = image;
+		x = -1 * image.width;
 		y = randomGenerator.nextInt(550) + 160;
 		speed = 1 + randomGenerator.nextInt(4);
+		maxCount = 20 + randomGenerator.nextInt(50);
 	}
 	
-	public void updateImage()
+	public void applyUpdate()
 	{
-		p.image(fallingImage,x,y);
+		if(count >= maxCount)
+		{
+			count = 0;
+			speed = 2 + randomGenerator.nextInt(4);
+		}
+		count++;
 		x += speed;
 	}
 
-	public int getY() {
+	public PImage getImage()
+	{
+		return image;
+	}
+	
+	public int getY() 
+	{
 		return y;
 	}
-	public int getX() {
+	
+	public int getX() 
+	{
 		return x;
 	}
 }

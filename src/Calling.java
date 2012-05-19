@@ -1,14 +1,16 @@
 
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import processing.core.PApplet;
 import processing.core.PImage;
 import twitter.data.object.FallingImage;
 import twitter.data.object.FlyingImage;
+import twitter.data.object.IMovingImage;
+import twitter4j.MediaEntity;
+import twitter4j.Tweet;
 /**
  * This is the main class. Processing provides a framework with a couple of main methods. These
  * methods are included in this class and explained below.
@@ -21,8 +23,6 @@ public class Calling extends PApplet
 	private PImage bannerImage;
 	private PImage restricted;
 
-	private int width = 1024;
-	private int height = 768;
 	private TwitterBox inThePipe;
 	
 	private int lastY = 0;
@@ -35,12 +35,16 @@ public class Calling extends PApplet
 	 * be a big win. 
 	 * 
 	 */
-	static Queue<FallingImage> PICS = new LinkedList<FallingImage>();
-	static Queue<FlyingImage> FLYING_PICS = new LinkedList<FlyingImage>();
+	static Queue<IMovingImage> PICS = new LinkedList<IMovingImage>();
+	static Queue<IMovingImage> FLYING_PICS = new LinkedList<IMovingImage>();
 	private Queue<TwitterBox> chirps = new LinkedList<TwitterBox>();
+
+	private static HashMap<String, IMovingImage> imageMap;
+	
 	public boolean censor = false;
 	TwitterThread tweetThread;
 	public static int TWEET_COUNT = 0;
+	private Renderer renderer = new Renderer(this);
 
 	//I think I was just using this to get a rough count of how many Tweets had run... should probably go to sleep.
 	int tweetCount = 0;
@@ -54,13 +58,95 @@ public class Calling extends PApplet
 		tweetThread = new TwitterThread(this);
 		tweetThread.start();
 		
-		bannerImage = loadImage("m2o_banner2.png","png");
-		restricted = loadImage("oops.jpg","jpg");
-		frameRate(30);		
-		size(width, height);
-	}//end setup
+		bannerImage = loadLocalImage("m2o_banner2.png");
+		restricted = loadLocalImage("oops.jpg");
+		buildImageMap();
+		frameRate(30);
+		size(Shared.Width, Shared.Height);
+	}
 	
+	/*
+	 * The easter egg detector for cat party and friends
+	 */
+	public static void partyTime(String word)
+	{
+		word = word.trim().replace("#", "").toLowerCase();
+		boolean isParty = word.contains("party");
+		if(isParty)
+		{
+			word = word.replace("party", "");
+		}
+		if(imageMap.containsKey(word))
+		{
+			IMovingImage image = imageMap.get(word);
+			int partySize = isParty ? (int)(Math.random() * 5) + 5 : 1;
+			for(int i = 0 ; i < partySize ; i++)
+			{
+				if(image.getClass() == FlyingImage.class)
+				{
+					Calling.FLYING_PICS.add(new FlyingImage(image.getImage()));
+				}
+				else
+				{
+					Calling.PICS.add(new FallingImage(image.getImage()));
+				}
+			}
+		}
+	}
+	
+	private void buildImageMap()
+	{
+		imageMap = new HashMap<String, IMovingImage>();
+		imageMap.put("cat", new FallingImage(loadLocalImage("fallingcat.png")));
+		imageMap.put("anvil", new FallingImage(loadLocalImage("anvil.png")));
+		imageMap.put("dog", new FallingImage(loadLocalImage("dog.png")));
+		imageMap.put("squirrel", new FallingImage(loadLocalImage("squirrel.png")));
+		imageMap.put("rainbow", new FallingImage(loadLocalImage("rainbow.png")));
+		imageMap.put("fish", new FlyingImage(loadLocalImage("fish.png")));
+		imageMap.put("heart", new FallingImage(loadLocalImage("heart.png")));
+		imageMap.put("madmen", new FallingImage(loadLocalImage("madmen.png")));
+		imageMap.put("pigsfly", new FlyingImage(loadLocalImage("pigsFly.png")));
+		imageMap.put("shark", new FlyingImage(loadLocalImage("sharkparty.png")));
+	}
 
+	public PImage loadLocalImage(String name)
+	{
+		return super.loadImage(Shared.ImageFolder + name);
+	}
+	
+	
+	public TwitterBox createTwitterBox(Tweet tweet)
+	{
+		TwitterBox tb = new TwitterBox(tweet);
+		try
+		{
+			tb.setUserImage(loadImage(tweet.getProfileImageUrl(), "png"));
+			System.out.println("Profile Image:" + tweet.getProfileImageUrl());
+		}
+		catch(Exception ex)
+		{
+			System.err.println("Couldn't load profile image.");
+			ex.printStackTrace();
+		}
+		MediaEntity[] mediaEntities = tweet.getMediaEntities();
+		
+		if(mediaEntities != null)
+		{
+			try
+			{
+			tb.setImage(loadImage(mediaEntities[0].getMediaURLHttps().toString()));
+
+			System.out.println("Media Content: " + mediaEntities[0].getMediaURLHttps().toString());
+			}
+			catch(Exception ex)
+			{
+				System.err.println("Couldn't load media content.");
+				ex.printStackTrace();
+			}
+		}
+		return tb;
+	}
+	
 	/*
 	 * The draw() function is a loop that runs at a defined frame rate. During each loop the screen is 
 	 * re-drawn. Each loop you have to setup the background colour, text colour, etc like layers.
@@ -69,22 +155,18 @@ public class Calling extends PApplet
 	{
 		background(1);		
 
-		stroke(250,250,250);
-		fill(250,250,250);
-	
 		if(lastY <= 0)
 		{
-			TwitterBox temp;
-			temp = Shared.TWEETS.poll();
+			TwitterBox temp = Shared.TWEETS.poll();
 			
 			System.out.println("Getting tweet...");
 
 			if(temp != null)
 			{
-				if(temp.getImageSize() > 0)
+				if(temp.getImageHeight() > 0)
 				{
-					temp.setY(-1 * temp.getImageSize());
-					lastY = temp.getImageSize()+120;
+					temp.setY(-1 * temp.getImageHeight());
+					lastY = temp.getImageHeight() + 120;
 					System.out.println("SET: " + lastY);
 				}
 				else
@@ -117,14 +199,14 @@ public class Calling extends PApplet
 			}
 			else
 			{
-				chirp.updateTwitterBox(this);
+				renderer.updateTwitterBox(chirp);
 				chirps.add(chirp);
 			}
 		}
 		
 		for(int i = 0 ; i < PICS.size() ; i++)
 		{
-			FallingImage pic = PICS.poll();
+			IMovingImage pic = PICS.poll();
 			
 			if(pic.getY() > height)
 			{
@@ -132,14 +214,14 @@ public class Calling extends PApplet
 			}
 			else
 			{
-				pic.updateImage();
+				renderer.updateImage(pic);
 				PICS.add(pic);
 			}
 		}
 		
 		for(int i = 0 ; i < FLYING_PICS.size() ; i++)
 		{
-			FlyingImage pic = FLYING_PICS.poll();
+			IMovingImage pic = FLYING_PICS.poll();
 			
 			if(pic.getX() > width)
 			{
@@ -147,7 +229,7 @@ public class Calling extends PApplet
 			}
 			else
 			{
-				pic.updateImage();
+				renderer.updateImage(pic);
 				FLYING_PICS.add(pic);
 			}
 		}
@@ -163,7 +245,7 @@ public class Calling extends PApplet
 		}
 		//WAIT = false;
 
-	}//end draw
+	}
 	
 	static public void main(String args[]) 
 	{
@@ -188,59 +270,59 @@ public class Calling extends PApplet
 		}
 		if (key == 'c')
 		{
-			  PICS.add(new FallingImage(loadImage("fallingcat.png","png"), this));
+			partyTime("cat");
 		}
 		if (key == 'a')
 		{
-			PICS.add(new FallingImage(loadImage("anvil.png","png"), this));
+			partyTime("anvil");
 		}
 		if(key == 'm')
 		{
-			PICS.add(new FallingImage(loadImage("madmen.png","png"), this));
+			partyTime("madmen");
 		}
 		if(key == '1')
 		{
-			PICS.add(new FallingImage(loadImage("m2o_banner2.png","png"), this, "noMove"));
+			PICS.add(new FallingImage(loadLocalImage("m2o_banner2.png"), "noMove"));
 		}
 		if(key == '2')
 		{
-			PICS.add(new FallingImage(loadImage("m2o_banner2.png","png"), this, "random"));
+			PICS.add(new FallingImage(loadLocalImage("m2o_banner2.png"), "random"));
 		}
 		if(key == 'x')
 		{
-			censor = censor?false:true;
+			censor = !censor;
 		}
 		if(key == 'k')
 		{
-			 FLYING_PICS.add(new FlyingImage(loadImage("fallingcat.png","png"), this));
+			partyTime("cat");
 		}
 		if(key == 'p')
 		{
-			 FLYING_PICS.add(new FlyingImage(loadImage("pigsFly.png","png"), this));
+			partyTime("pigsfly");
 		}
 		if(key == 'h')
 		{
-			 PICS.add(new FallingImage(loadImage("heart.png","png"), this));
+			partyTime("heart");
 		}
 		if(key == 'f')
 		{
-			 FLYING_PICS.add(new FlyingImage(loadImage("fish.png","png"), this));
+			partyTime("fish");
 		}
 		if(key == 's')
 		{
-			 FLYING_PICS.add(new FlyingImage(loadImage("sharkparty.png","png"), this));
+			partyTime("sharkparty");
 		}
 		if(key == 'r')
 		{
-			 PICS.add(new FallingImage(loadImage("rainbow.png","png"), this));
+			partyTime("rainbow");
 		}
 		if(key == 'd')
 		{
-			 PICS.add(new FallingImage(loadImage("dog.png","png"), this));
+			partyTime("dog");
 		}
 		if(key == 'n')
 		{
-			 PICS.add(new FallingImage(loadImage("squirrel.png","png"), this));
+			partyTime("squirrel");
 		}
 		if(key == 'q')
 		{
@@ -256,8 +338,9 @@ public class Calling extends PApplet
 		}
 		
 		if (key == '/')
+		{
 			inThePipe.killTweet();
-		
+		}
 	}		  
-}//end class
+}
 
