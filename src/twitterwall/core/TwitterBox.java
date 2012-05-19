@@ -1,9 +1,13 @@
+package twitterwall.core;
+
+
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.StringTokenizer;
 
 import processing.core.PImage;
+import twitter.data.object.TweetSource;
 import twitter4j.Tweet;
 
 /**
@@ -18,13 +22,17 @@ public class TwitterBox
 {
 	protected PImage userImage;
 	protected PImage tweetImage;
-	protected int x = 0;
-	protected int y = 0;
+	
+	// TODO: make these accessors.
+	public int x = 0;
+	public int y = 0;
+	
 	public String first = "";
 	protected String second  = "";
 	private String colourToken = "white";
 	Tweet chirp;
 	private long created;
+	private TweetSource source;
 	
 	public PImage getUserImage() 
 	{
@@ -61,12 +69,17 @@ public class TwitterBox
 		return colourToken;
 	}
 	
+	public TweetSource getSource()
+	{
+		return source;
+	}
+	
 	public TwitterBox(Tweet tweet)
 	{		
 		created = Calendar.getInstance().getTimeInMillis();
 		this.chirp = tweet;
 		processTweet(tweet.getText());
-
+		source = TweetSource.create(tweet.getSource());
 		x = 0;
 		y = 0;
 	}

@@ -1,5 +1,8 @@
+package twitterwall.core;
+
 import java.util.LinkedList;
 import java.util.Queue;
+
 
 /**
  * Some static variables used across the threads. The queue of Tweets and
@@ -18,5 +21,8 @@ public class Shared
 	public static final int Height = 768;
 	
 	public static final String ImageFolder = "images/";
+	public static final String IconFolder = "icons/";
+	
+	public static final int IconSize = 48;
 	
 }

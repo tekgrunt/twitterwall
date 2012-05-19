@@ -1,29 +1,58 @@
+package twitterwall.core;
+
 import java.awt.Color;
 import java.util.HashMap;
 
-import processing.core.PApplet;
 import processing.core.PFont;
-import twitter.data.object.FallingImage;
-import twitter.data.object.FlyingImage;
+import processing.core.PImage;
 import twitter.data.object.IMovingImage;
+import twitter.data.object.TweetSource;
 
 public class Renderer 
 {
 	private PFont font;
-	private PApplet p;
+	private Calling p;
 
 	private HashMap<String, Color> colorMap;
+	private HashMap<TweetSource, PImage> sourceMap;
 	
-	public Renderer(PApplet p)
+	public Renderer(Calling p)
 	{
+		this.p = p;
 		font = p.loadFont("fonts/Verdana-20.vlw");
 		buildColorMap();
-		this.p = p;
+		buildSourceMap();
 	}
 	
 	public PFont getFont()
 	{
 		return font;
+	}
+	
+	private void buildSourceMap()
+	{
+		sourceMap = new HashMap<TweetSource, PImage>();
+		sourceMap.put(TweetSource.Web, loadIcon("web.png"));
+		sourceMap.put(TweetSource.Mobile, loadIcon("mobile.png"));
+		sourceMap.put(TweetSource.Android, loadIcon("android.png"));
+		sourceMap.put(TweetSource.iOS, loadIcon("ios.png"));
+		sourceMap.put(TweetSource.Blackberry, loadIcon("blackberry.png"));
+		sourceMap.put(TweetSource.Echofon, loadIcon("echofon.png"));
+		sourceMap.put(TweetSource.Hootsuite, loadIcon("hootsuite.png"));
+		sourceMap.put(TweetSource.Instagram, loadIcon("instagram.png"));
+		sourceMap.put(TweetSource.Plume, loadIcon("plume.png"));
+		sourceMap.put(TweetSource.Ubersocial, loadIcon("ubersocial.png"));
+		sourceMap.put(TweetSource.Tweetbot, loadIcon("tweetbot.png"));
+		sourceMap.put(TweetSource.Tweetcaster, loadIcon("tweetcaster.png"));
+		sourceMap.put(TweetSource.TweetDeck, loadIcon("tweetdeck.png"));
+		sourceMap.put(TweetSource.TwitterFeed, loadIcon("twitterfeed.png"));
+	}
+	
+	private PImage loadIcon(String name)
+	{
+		PImage toReturn = p.loadLocalIcon(name);
+		toReturn.resize(Shared.IconSize, Shared.IconSize);
+		return toReturn;
 	}
 	
 	private void buildColorMap()
@@ -69,7 +98,10 @@ public class Renderer
 		if(box.getUserImage() != null)
 		{
 			p.image(box.getUserImage(), box.x, box.y);
-			p.image(box.getUserImage(), box.x + 964 + 10, box.y);
+		}
+		if(box.getSource() != TweetSource.Unknown)
+		{
+			p.image(sourceMap.get(box.getSource()), box.x + 964 + 10, box.y);
 		}
 		if(box.getImage() != null)
 		{

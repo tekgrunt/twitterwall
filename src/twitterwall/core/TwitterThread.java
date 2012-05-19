@@ -1,3 +1,5 @@
+package twitterwall.core;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,7 +56,8 @@ public class TwitterThread extends Thread
 		myTwitter = new TwitterFactory().getInstance();
 		myTwitter.setOAuthConsumer("DataVisual", "m2blowme2012");	
 
-		topics.add("#ifonlyyoucould");
+		topics.add("beautiful");
+//		topics.add("#ifonlyyoucould");
 //		topics.add("#Thingsthatpissmeoffinthemorning");
 //		topics.add("#twitterbirsokakolsaydi");
 //		topics.add("#BabyHorse");

@@ -1,5 +1,4 @@
-
-
+package twitterwall.core;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -114,6 +113,10 @@ public class Calling extends PApplet
 		return super.loadImage(Shared.ImageFolder + name);
 	}
 	
+	public PImage loadLocalIcon(String name)
+	{
+		return super.loadImage(Shared.IconFolder + name);
+	}
 	
 	public TwitterBox createTwitterBox(Tweet tweet)
 	{
@@ -249,7 +252,7 @@ public class Calling extends PApplet
 	
 	static public void main(String args[]) 
 	{
-	    PApplet.main(new String[] { "--present", "Calling" });
+	    PApplet.main(new String[] { "--present", "twitterwall.core.Calling" });
 	}
 	
 	public void mousePressed() 
