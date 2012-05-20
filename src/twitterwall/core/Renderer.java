@@ -2,6 +2,7 @@ package twitterwall.core;
 
 import java.awt.Color;
 import java.util.HashMap;
+import java.util.LinkedList;
 
 import processing.core.PFont;
 import processing.core.PImage;
@@ -10,11 +11,25 @@ import twitter.data.object.TweetSource;
 
 public class Renderer 
 {
+	private PImage bg;	
+	private PImage bannerImage;
+	private PImage restricted;
+	
+	
+	private boolean showBackground = true;
+	private int currentBackground = 0;
+	boolean changingBackground;
+	int backgroundAlpha = 0;
+	
+	
 	private PFont font;
 	private Calling p;
 
 	private HashMap<String, Color> colorMap;
 	private HashMap<TweetSource, PImage> sourceMap;
+
+	private LinkedList<PImage> backgrounds = new LinkedList<PImage>();
+	private boolean censored;
 	
 	public Renderer(Calling p)
 	{
@@ -22,6 +37,10 @@ public class Renderer
 		font = p.loadFont("fonts/Verdana-20.vlw");
 		buildColorMap();
 		buildSourceMap();
+		loadBackgrounds();
+		bg = backgrounds.get(0);
+		bannerImage = p.loadLocalImage("m2o_banner2.png");
+		restricted = p.loadLocalImage("oops.jpg");
 	}
 	
 	public HashMap<String, Color> getColorMap()
@@ -32,6 +51,29 @@ public class Renderer
 	public PFont getFont()
 	{
 		return font;
+	}
+	
+	private void loadBackgrounds()
+	{
+		backgrounds.add(p.loadLocalBackground("02182_campmeekerwaterfall_1024x768.jpg"));
+		backgrounds.add(p.loadLocalBackground("01665_streamssun_1024x768.jpg"));
+		backgrounds.add(p.loadLocalBackground("02110_lowerfallsyellowstone_1024x768.jpg"));
+		backgrounds.add(p.loadLocalBackground("02118_waterfall_1024x768.jpg"));
+		backgrounds.add(p.loadLocalBackground("02174_gazeduponbyangelsintheirflight_1024x768.jpg"));
+		backgrounds.add(p.loadLocalBackground("02291_yosemitefalls_1024x768.jpg"));
+		backgrounds.add(p.loadLocalBackground("02414_blackforest_1024x768.jpg"));
+		backgrounds.add(p.loadLocalBackground("02449_burneyfalls_1024x768.jpg"));
+	}
+	
+	public void toggleBackground()
+	{
+		showBackground = !showBackground;
+	}
+	
+	public void nextBackground()
+	{
+		backgroundAlpha = 0;
+		changingBackground = true;
 	}
 	
 	private void buildSourceMap()
@@ -63,19 +105,20 @@ public class Renderer
 	private void buildColorMap()
 	{
 		colorMap = new HashMap<String, Color>();
-		colorMap.put("blue", new Color(0, 0, 250));
-		colorMap.put("red", new Color(250, 0, 0));
-		colorMap.put("green", new Color(0, 250, 0));
-		colorMap.put("yellow", new Color(250, 250, 0));
-		colorMap.put("pink", new Color(249, 74, 173));
-		colorMap.put("purple", new Color(203, 25, 201));
+		colorMap.put("blue", Color.blue);
+		colorMap.put("red", Color.red);
+		colorMap.put("green", Color.green);
+		colorMap.put("yellow", Color.yellow);
+		colorMap.put("pink", Color.pink);
+		colorMap.put("purple", Color.magenta);
 		colorMap.put("brown", new Color(188, 113, 5));
-		colorMap.put("orange", new Color(247,167,12));
-		colorMap.put("white", new Color(250, 250, 250));
+		colorMap.put("orange", Color.orange);
+		colorMap.put("white", Color.white);
 		
 //		colorMap.put("my", new Color(250, 250, 0));
 //		colorMap.put("so", new Color(249, 74, 173));
-//		colorMap.put("rt", new Color(203, 25, 201));
+		colorMap.put("rt", Color.cyan);
+		colorMap.put("this", Color.orange);
 	}
 	
 	/*
@@ -88,34 +131,44 @@ public class Renderer
 		box.y++;
 		p.textFont(font);
 
+		// draw the background for the tweet text.
 		Color c = (colorMap.containsKey(box.getTextColor())) ? colorMap.get(box.getTextColor()) : colorMap.get("white");
 		this.p.fill(0, 0, 0);
 		this.p.stroke(c.getRed(), c.getGreen(), c.getBlue());
 		p.rect(box.x + 65, box.y, 890, box.getHeight());
 		
+		// draw the tweet text
 		this.p.fill(c.getRed(), c.getGreen(), c.getBlue());
-		p.text(box.getFirstLine(), box.x + 80, box.y + 34);
+		p.text(box.getFirstLine(), box.x + 80, box.y + 18, 870, 20);
 		
 		if(box.getSecondLine().length() != 0)
 		{
-			p.text(box.getSecondLine(), box.x + 80, box.y + 64);
+			p.text(box.getSecondLine(), box.x + 80, box.y + 46, 870, 20);
 			offset = 14;
 		}
+		
+		// draw the user's profile image.
 		if(box.getUserImage() != null)
 		{
 			// draw a 2px border around the user picture. Then draw the picture.
 			int imageX = 6 + box.x;
 			int imageY = offset + box.y;
 			this.p.fill(250, 250, 250);
+			this.p.stroke(250, 250, 250);
 			p.rect(imageX, imageY, 51, 51);
 			p.image(box.getUserImage(), imageX + 2, imageY + 2);
 		}
+		
+		// draw the tweet source icon. 
 		if(box.getSource() != TweetSource.Unknown)
 		{
 			p.image(sourceMap.get(box.getSource()), box.x + 964, box.y + offset);
 		}
+		
+		// draw any associated image.
 		if(box.getImage() != null)
 		{
+			PImage image = box.getImage();
 			p.image(box.getImage(), box.x + 200, box.y + 100);	
 		}
 	}
@@ -124,5 +177,54 @@ public class Renderer
 	{
 		p.image(image.getImage(), image.getX(), image.getY());
 		image.applyUpdate();
+	}
+
+	public void renderScene() 
+	{
+		p.image(bannerImage, 0, 0);
+		if(censored)
+		{
+			p.image(restricted, 100, 120);
+		}
+	}
+
+	public void renderBackground() 
+	{
+		if(showBackground)
+		{
+			p.background(bg);
+			if(changingBackground || backgroundAlpha != 0)
+			{
+				if(changingBackground)
+				{
+					p.stroke(0, 0, 0, backgroundAlpha);
+					p.fill(0, 0, 0, backgroundAlpha);
+					p.rect(0, 0, p.width, p.height);
+					backgroundAlpha += 5;
+					if(backgroundAlpha >= 255)
+					{
+						currentBackground = (currentBackground + 1) % backgrounds.size(); 
+						bg = backgrounds.get(currentBackground);
+						changingBackground = false;
+					}
+				}
+				else
+				{
+					p.stroke(0, 0, 0, backgroundAlpha);
+					p.fill(0, 0, 0, backgroundAlpha);
+					p.rect(0, 0, p.width, p.height);
+					backgroundAlpha -= 5;
+				}
+			}
+		}
+		else
+		{
+			p.background(1);
+		}
+	}
+
+	public void toggleCensor() 
+	{
+		censored = !censored;
 	}
 }

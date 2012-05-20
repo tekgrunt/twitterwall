@@ -28,7 +28,6 @@ public class TwitterThread extends Thread
 	private Twitter myTwitter;
 	private Query query;
 	private QueryResult result;
-	private TwitterBox inThePipe;
 	private Calling p;
 	private WebService webService; //<-- dead until I sort out what I was working on.
 	private DataConnection dataConnection;
@@ -56,7 +55,7 @@ public class TwitterThread extends Thread
 		myTwitter = new TwitterFactory().getInstance();
 		myTwitter.setOAuthConsumer("DataVisual", "m2blowme2012");	
 
-		topics.add("beautiful");
+		topics.add("fuck");
 //		topics.add("#ifonlyyoucould");
 //		topics.add("#Thingsthatpissmeoffinthemorning");
 //		topics.add("#twitterbirsokakolsaydi");
@@ -122,10 +121,10 @@ public class TwitterThread extends Thread
 				{
 					dataConnection.enterTweetData(new TweetData(t.getId(), t.getFromUser(), t.getText(), t.getProfileImageUrl(), t.getSource(), ""));
 				}
-				inThePipe = p.createTwitterBox(t);
+				
 				//System.out.println("*** Adding unique item");
-				Shared.TWEETS.add(inThePipe);
-				Calling.TWEET_COUNT++;
+				Shared.TWEETS.add(p.createTwitterBox(t));
+				Calling.TotalTweetCount++;
 			//	System.out.println("Tweet Count: " + Calling.TWEET_COUNT + "  TWEETS: " + Shared.TWEETS.size() + "  >>>  " + t.getText());
 			} 
 		} 

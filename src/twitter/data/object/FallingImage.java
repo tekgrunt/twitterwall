@@ -24,7 +24,7 @@ public class FallingImage implements IMovingImage
 		Random randomGenerator = new Random();
 		this.image = image;
 		y = -1 * image.height;
-		x = randomGenerator.nextInt(1024);
+		x = randomGenerator.nextInt(1024 - (image.width / 2));
 		speed = 1 + randomGenerator.nextInt(4);
 	}
 	
@@ -60,5 +60,11 @@ public class FallingImage implements IMovingImage
 	}
 	public int getX() {
 		return x;
+	}
+
+	@Override
+	public void dispose() 
+	{
+		image = null;
 	}
 }

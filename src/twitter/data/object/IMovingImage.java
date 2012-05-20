@@ -7,5 +7,6 @@ public interface IMovingImage
 	public void applyUpdate();
 	public PImage getImage();
 	public int getY();
-	public int getX(); 
+	public int getX();
+	public void dispose(); 
 }

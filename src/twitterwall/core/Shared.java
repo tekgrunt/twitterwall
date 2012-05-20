@@ -22,6 +22,7 @@ public class Shared
 	
 	public static final String ImageFolder = "images/";
 	public static final String IconFolder = "icons/";
+	public static final String BackgroundsFolder = "backgrounds/";
 	
 	public static final int IconSize = 48;
 	

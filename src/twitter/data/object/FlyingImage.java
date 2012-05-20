@@ -17,7 +17,7 @@ public class FlyingImage implements IMovingImage
 	private int count = 1;
 	private int maxCount = 20;
 	private int speed;
-private Random randomGenerator;
+	private Random randomGenerator;
 	
 	public FlyingImage(PImage image)
 	{
@@ -53,5 +53,12 @@ private Random randomGenerator;
 	public int getX() 
 	{
 		return x;
+	}
+
+	@Override
+	public void dispose() 
+	{
+		randomGenerator = null;
+		image = null;
 	}
 }

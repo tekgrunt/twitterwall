@@ -1,10 +1,8 @@
 package twitterwall.core;
 
-
-
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.StringTokenizer;
+import java.util.regex.Pattern;
 
 import processing.core.PImage;
 import twitter.data.object.TweetSource;
@@ -20,19 +18,21 @@ import twitter4j.Tweet;
  */
 public class TwitterBox 
 {
-	protected PImage userImage;
-	protected PImage tweetImage;
+	private PImage userImage;
+	private PImage tweetImage;
+	private Tweet chirp;
+	private TweetSource source;
 	
 	// TODO: make these accessors.
 	public int x = 0;
 	public int y = 0;
+	private long created;
 	
 	public String first = "";
 	protected String second = "";
 	private String colorToken = "white";
-	Tweet chirp;
-	private long created;
-	private TweetSource source;
+	
+	private static Pattern cursingFilter = Pattern.compile("fuck|cunt|shit", Pattern.CASE_INSENSITIVE);
 	
 	public PImage getUserImage() 
 	{
@@ -111,69 +111,45 @@ public class TwitterBox
 	
 	private void processTweet(String input)
 	{	
+		input = sanitize(input);
+		if(input.length() < 80)
+		{
+			first = input;
+			return;
+		}
 		StringTokenizer st = new StringTokenizer(input, " ");
-		String temp = "";
+		String token = "";
 		while(st.hasMoreTokens())
 		{
-			 temp = st.nextToken() + " " + temp;
+			 token = st.nextToken();
+			 if(first.length() + token.length() > 80)
+			 {
+				 second = input.substring(first.length());
+				 if(second.length() > 80)
+				 {
+					 first = input.substring(0, 80);
+					 second = input.substring(80);
+				 }
+				 break;
+			 }
+			 else
+			 {
+				 first = first + " " + token;
+			 }
 		}
-		sanitize(input);
-		ArrayList<String> firstLine = new ArrayList<String>();
-		ArrayList<String> secondLine = new ArrayList<String>();
-		char[] chars = input.toCharArray();
-		int charCount = 0;
-		String word = "";
-		
-		/*
-		 * This is some horrendous string parsing I had to do to my own word wrap
-		 */
-		for(char token : chars)
-		{
-			charCount++;
-			word = word + token;
-			if(token == ' ' && charCount < 80)
-			{
-				firstLine.add(word);
-				word = "";
-			} 
-			else if (token == ' ')
-			{
-				secondLine.add(word);
-				word = "";
-			}
-		}
-		
-		if(chars.length < 80)
-		{
-			firstLine.add(word);
-		}
-		else
-		{
-			secondLine.add(word);
-		}
-		
-		for(String f : firstLine)
-		{
-			first += f;
-		}
-		
-		for(String s : secondLine)
-		{
-			second += s;
-		}
+		first = first.trim();
+		second = second.trim();
+		return;
 	}
 
 	/*
-	 * Checks for common swear words and replaces them with fitting substitutes.
+	 * Checks for common swear words and replaces them with asterisks.
 	 */
-	public String sanitize(String text)
+	public String sanitize(String input)
 	{
-		text.trim();
-		text.replace("\n", "");
-		text.replace("fuck", "bleep");
-		text.replace("cunt", "bleep");
-		text.replace("shit", "poop");
-		return text;
+		String text = input.trim();
+		text = text.replace("\n", " ");
+		return cursingFilter.matcher(text).replaceAll("****");
 	}
 	
 	/*
@@ -191,14 +167,14 @@ public class TwitterBox
 	}
 
 	/*
-	 * I think I had functionilty in the first iteration that if you clicked on a tweet or hit a specific key
+	 * I think I had functionality in the first iteration that if you clicked on a tweet or hit a specific key
 	 * when it was in the queue it would remove the text. Being able to manage the live stream of content would
 	 * be a big win... just trying to figure out how to do that is the challenge.
 	 */
 	public void killTweet()
 	{		
-		first="";
-		second="";
+		first = "";
+		second = "";
 	}
 
 	public int getX() 
@@ -219,5 +195,11 @@ public class TwitterBox
 	public void setY(int y) 
 	{
 		this.y = y;
+	}
+	
+	public void dispose()
+	{
+		this.tweetImage = null;
+		this.chirp = null;
 	}
 }

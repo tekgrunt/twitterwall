@@ -2,7 +2,6 @@ package twitterwall.core;
 
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Queue;
 import java.util.StringTokenizer;
 
 import processing.core.PApplet;
@@ -21,32 +20,18 @@ import twitter4j.Tweet;
 @SuppressWarnings("serial")
 public class Calling extends PApplet
 {
-	private PImage bannerImage;
-	private PImage restricted;
-	private PImage bg;
-	
-	private TwitterBox inThePipe;
-	
-	private int lastY = 0;
-	
-	/*
-	 * I have a bunch of queues here for the different items that move across the screen.
-	 * Once they have moved across the screen we set them to null and the GC picks them up.
-	 * I think it is the GC that is causing the occasional jerk/freeze that happens.
-	 * I am not sure if there is anything that can be done to make this better but it would
-	 * be a big win. 
-	 * 
-	 */
 	private LinkedList<IMovingImage> imageQueue = new LinkedList<IMovingImage>();
-	private LinkedList<TwitterBox> chirps = new LinkedList<TwitterBox>();
-
+	private LinkedList<TwitterBox> tweets = new LinkedList<TwitterBox>();
+	
 	private static HashMap<String, IMovingImage> imageMap;
 	
 	public boolean censor = false;
-	public static int TWEET_COUNT = 0;
+	
+	public static int TotalTweetCount = 0;
+	public static int RenderedTweetCount = 0;
 
 	private TwitterThread tweetThread;
-	private Renderer renderer = new Renderer(this);
+	private Renderer renderer;
 
 	//I think I was just using this to get a rough count of how many Tweets had run... should probably go to sleep.
 	int tweetCount = 0;
@@ -59,13 +44,11 @@ public class Calling extends PApplet
 	{	
 		tweetThread = new TwitterThread(this);
 		tweetThread.start();
+		renderer = new Renderer(this);
 		
-		bannerImage = loadLocalImage("m2o_banner2.png");
-		restricted = loadLocalImage("oops.jpg");
 		buildImageMap();
 		frameRate(30);
 		size(Shared.Width, Shared.Height);
-		bg = super.loadImage("background/02182_campmeekerwaterfall_1024x768.jpg");
 	}
 	
 	/*
@@ -136,10 +119,17 @@ public class Calling extends PApplet
 		imageMap.put("pigsfly", new FlyingImage(loadLocalImage("pigsFly.png")));
 		imageMap.put("shark", new FlyingImage(loadLocalImage("sharkparty.png")));
 		
-	//	imageMap.put("she", new FallingImage(loadLocalImage("dog.png")));
-	//	imageMap.put("love", new FlyingImage(loadLocalImage("sharkparty.png")));
+		imageMap.put("she", new FallingImage(loadLocalImage("dog.png")));
+		imageMap.put("you", new FlyingImage(loadLocalImage("sharkparty.png")));
+		imageMap.put("my", new FlyingImage(loadLocalImage("fish.png")));
+		imageMap.put("so", new FallingImage(loadLocalImage("squirrel.png")));
 	}
-
+	
+	public PImage loadLocalBackground(String name)
+	{
+		return super.loadImage(Shared.BackgroundsFolder + name);
+	}
+	
 	public PImage loadLocalImage(String name)
 	{
 		return super.loadImage(Shared.ImageFolder + name);
@@ -187,15 +177,20 @@ public class Calling extends PApplet
 	 */
 	public void draw()
 	{
-		background(bg);		
-
-		if (chirps.size() < 8)
+		renderer.renderBackground();
+		
+		if (tweets.size() < 8)
 		{
-			int index = chirps.size() -1;
+			int index = tweets.size() -1;
 			TwitterBox temp = Shared.TWEETS.poll();
-
+			
 			if(temp != null)
 			{	
+				RenderedTweetCount++;
+				if(RenderedTweetCount % 2 == 0)
+				{
+					renderer.nextBackground();
+				}
 				parseEasterEggKeywords(temp);
 				parseColor(temp);
 				
@@ -203,24 +198,30 @@ public class Calling extends PApplet
 				int previousTweetLocation = 0;
 				if(index >= 0)
 				{ 
-					TwitterBox previous = chirps.get(index);
+					TwitterBox previous = tweets.get(index);
 					previousTweetLocation = previous.getY();
 				}
 				int offset = temp.getImageHeight() + temp.getHeight() + 52;
 				temp.setY(previousTweetLocation - offset);
-				chirps.add(temp);
+				tweets.add(temp);
+				
+				if(Shared.TWEETS.size() < 8)
+				{
+					Shared.TWEETS.add(createTwitterBox(temp.getTweet()));
+				}
 			}
 		}
 		
-		for(int i = 0; i < chirps.size();)
+		for(int i = 0; i < tweets.size();)
 		{
 			//System.out.println("Chirp count: " + chirps.size());
 			//System.out.println("TWEETS count: " + Shared.TWEETS.size());
-			TwitterBox chirp = chirps.get(i);
-			if(chirp.getY() > height)
+			TwitterBox tb = tweets.get(i);
+			if(tb.getY() > height)
 			{
-				chirps.remove(chirp);
-				chirp = null;
+				tweets.remove(tb);
+				tb.dispose();
+				tb = null;
 			//	System.out.println("Setting to null: + " + chirps.size());
 
 			//	System.out.println("Chirp count: " + chirps.size());
@@ -228,7 +229,7 @@ public class Calling extends PApplet
 			}
 			else
 			{
-				renderer.updateTwitterBox(chirp);
+				renderer.updateTwitterBox(tb);
 				i++;
 			}
 		}
@@ -245,6 +246,7 @@ public class Calling extends PApplet
 			if(pic.getX() > width || pic.getY() > height)
 			{
 				imageQueue.remove(pic);
+				pic.dispose();
 				pic = null;
 			}
 			else
@@ -252,12 +254,9 @@ public class Calling extends PApplet
 				i++;
 			}
 		}
-		image(bannerImage, 0, 0);
-		if(censor)
-		{
-			image(restricted, 100, 120);
-		}
-		
+
+		renderer.renderScene();
+
 		if(Shared.TWEETS.size() > 50)
 		{
 			Shared.TWEETS = new LinkedList<TwitterBox>();
@@ -279,11 +278,22 @@ public class Calling extends PApplet
 			}
 		}
 	}
-	
-	public void keyPressed() {
+
+	public void keyPressed() 
+	{
+		// right arrow key
+		if(keyCode == 39)
+		{
+			System.out.println(keyCode);
+			renderer.nextBackground();
+		}
 		if (key == '.')
 		{
 			
+		}
+		if (key == 'b')
+		{
+			renderer.toggleBackground();
 		}
 		if (key == 'c')
 		{
@@ -297,17 +307,9 @@ public class Calling extends PApplet
 		{
 			partyTime("madmen");
 		}
-		if(key == '1')
-		{
-			imageQueue.add(new FallingImage(loadLocalImage("m2o_banner2.png"), "noMove"));
-		}
-		if(key == '2')
-		{
-			imageQueue.add(new FallingImage(loadLocalImage("m2o_banner2.png"), "random"));
-		}
 		if(key == 'x')
 		{
-			censor = !censor;
+			renderer.toggleCensor();
 		}
 		if(key == 'k')
 		{
@@ -345,15 +347,13 @@ public class Calling extends PApplet
 		{
 			 Shared.TWEETS = new LinkedList<TwitterBox>();
 		}
-		
 		if(key == 'e')
 		{
 			imageQueue.clear();
 		}
-		
-		if (key == '/')
+		if(key == 'g')
 		{
-			inThePipe.killTweet();
+			System.gc();
 		}
 	}		  
 }
