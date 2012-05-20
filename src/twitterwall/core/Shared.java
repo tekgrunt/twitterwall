@@ -25,4 +25,5 @@ public class Shared
 	
 	public static final int IconSize = 48;
 	
+	public static boolean WEBSERVICE_ENABLED = true;
 }

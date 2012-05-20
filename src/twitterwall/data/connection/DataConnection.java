@@ -63,6 +63,7 @@ public class DataConnection
 	{			
 		try
 		{	
+			
 			boolean isTweetInDB = false;
 			//wrong?? is this one tweet per user or each tweet is unique...?
 			PreparedStatement test = conn.prepareStatement("select * from tweet_details where twitter_id = " + tweetData.getTwitterId());
