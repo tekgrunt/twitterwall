@@ -11,7 +11,7 @@ import twitter4j.Tweet;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
-import twitterwall.data.connection.DataConnection;
+import twitterwall.data.local.DataConnection;
 
 import com.mysql.jdbc.Connection;
 
@@ -119,9 +119,13 @@ public class TwitterThread extends Thread
 				//webService.sendTweetData(t.getFromUserId(), t.getFromUser(), t.getText(), t.getProfileImageUrl(), t.getSource(), mediaEntry);
 				if(Shared.LOCAL_DB_ENABLED)
 				{
-					dataConnection.enterTweetData(new TweetData(t.getId(), t.getFromUser(), t.getText(), t.getProfileImageUrl(), t.getSource(), ""));
+					dataConnection.enterTweetData(t);
 				}
 				
+				if(Shared.WEBSERVICE_ENABLED)
+				{
+					//call here
+				}
 				//System.out.println("*** Adding unique item");
 				Shared.TWEETS.add(p.createTwitterBox(t));
 				Calling.TotalTweetCount++;

@@ -7,6 +7,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+
+import twitter4j.Tweet;
 /**
  * This should currently be thought of as a stub. I was having trouble sending URLs over GET and was unable to either send POST data
  * or pull it out on the server... I hacked at this for the better part of a day - for the time being I am going to store all data 
@@ -24,18 +27,14 @@ public class WebService
 
 	}
 
-	public void sendTweetData(long twitter_id, String user_name, String tweet, String profile_image, String source, String media_entry)
+	public void sendTweetData(Tweet tweet)
 	{
-		String tweetData = "?twitter_id=" + twitter_id + "&user_name=" + user_name;// + "&profile_image=" + profile_image;//"&tweet=" + tweet ;//+ "&profile_image=" + profile_image + "&source=" + source + "&media_entry=" + media_entry;
+		String tweetData = "?twitter_id=" + tweet.getFromUserId() + "&user_name=" + tweet.getFromUser();// + "&profile_image=" + profile_image;//"&tweet=" + tweet ;//+ "&profile_image=" + profile_image + "&source=" + source + "&media_entry=" + media_entry;
 				
 		try 
 		{			
-			String encodedString = URLEncoder.encode(tweetData,"UTF-8");
-			
-			encodedString = encodedString+"%26profile_image%3Dhttp%3A%2F%2Fa0.twimg.com%2Fprofile_images%2F902637317%2Flogo_normal";
-			
+			String encodedString = URLEncoder.encode(tweetData,"UTF-8");			
 			URL encodedUrl = new URL("http://christopherluft.com/TwitterWallServer/insert.php" + encodedString);
-			
 			
 			System.out.println("****************** " + "http://christopherluft.com/TwitterWallServer/insert.php" + encodedString);
 			
@@ -48,7 +47,6 @@ public class WebService
 	            System.out.println(inputLine);
 	        }
 	        in.close();
-        
 		} 
 		catch (MalformedURLException e) 
 		{
@@ -60,6 +58,39 @@ public class WebService
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	public static ArrayList<String> getSearchTerms() 
+	{		
+		String resultString = "";
+		try 
+		{			
+		//	String encodedString = URLEncoder.encode(tweetData,"UTF-8");			
+			URL encodedUrl = new URL("http://christopherluft.com/TwitterWallServer/searchTerms.php" );
+						
+			URLConnection uc = encodedUrl.openConnection();
+			BufferedReader in = new BufferedReader(new InputStreamReader(uc.getInputStream()));
+			String inputLine;
+
+	        while ((inputLine = in.readLine()) != null) 
+	        {
+	            resultString = resultString.concat(inputLine);
+	        }
+	        in.close();
+		} 
+		catch (MalformedURLException e) 
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
+		catch (IOException e) 
+		{
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		System.out.println("********   " + resultString);
+		return null;
 	}
 	
 }
