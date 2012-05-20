@@ -1,7 +1,9 @@
 package twitterwall.core;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.StringTokenizer;
 
 import processing.core.PApplet;
 import processing.core.PImage;
@@ -21,7 +23,8 @@ public class Calling extends PApplet
 {
 	private PImage bannerImage;
 	private PImage restricted;
-
+	private PImage bg;
+	
 	private TwitterBox inThePipe;
 	
 	private int lastY = 0;
@@ -34,15 +37,15 @@ public class Calling extends PApplet
 	 * be a big win. 
 	 * 
 	 */
-	static Queue<IMovingImage> PICS = new LinkedList<IMovingImage>();
-	static Queue<IMovingImage> FLYING_PICS = new LinkedList<IMovingImage>();
-	private Queue<TwitterBox> chirps = new LinkedList<TwitterBox>();
+	private LinkedList<IMovingImage> imageQueue = new LinkedList<IMovingImage>();
+	private LinkedList<TwitterBox> chirps = new LinkedList<TwitterBox>();
 
 	private static HashMap<String, IMovingImage> imageMap;
 	
 	public boolean censor = false;
-	TwitterThread tweetThread;
 	public static int TWEET_COUNT = 0;
+
+	private TwitterThread tweetThread;
 	private Renderer renderer = new Renderer(this);
 
 	//I think I was just using this to get a rough count of how many Tweets had run... should probably go to sleep.
@@ -62,14 +65,25 @@ public class Calling extends PApplet
 		buildImageMap();
 		frameRate(30);
 		size(Shared.Width, Shared.Height);
+		bg = super.loadImage("background/02182_campmeekerwaterfall_1024x768.jpg");
 	}
 	
 	/*
 	 * The easter egg detector for cat party and friends
 	 */
-	public static void partyTime(String word)
+	private void parseEasterEggKeywords(TwitterBox box)
 	{
-		word = word.trim().replace("#", "").toLowerCase();
+		// Check for keywords...
+		StringTokenizer st = new StringTokenizer(box.getText().toLowerCase(), " ");
+		while(st.hasMoreTokens())
+		{
+			partyTime(st.nextToken());
+		}
+	}
+	
+	private void partyTime(String word)
+	{
+		word = word.replace("#", "");
 		boolean isParty = word.contains("party");
 		if(isParty)
 		{
@@ -83,12 +97,27 @@ public class Calling extends PApplet
 			{
 				if(image.getClass() == FlyingImage.class)
 				{
-					Calling.FLYING_PICS.add(new FlyingImage(image.getImage()));
+					imageQueue.add(new FlyingImage(image.getImage()));
 				}
 				else
 				{
-					Calling.PICS.add(new FallingImage(image.getImage()));
+					imageQueue.add(new FallingImage(image.getImage()));
 				}
+			}
+		}
+	}
+	
+	private void parseColor(TwitterBox box)
+	{
+		// Check for keywords...
+		StringTokenizer st = new StringTokenizer(box.getText().toLowerCase(), " ");
+		boolean found = false;
+		while(st.hasMoreTokens() && !found)
+		{
+			String word = st.nextToken().replace("#", "");
+			if(renderer.getColorMap().containsKey(word))
+			{
+				box.setTextColor(word);
 			}
 		}
 	}
@@ -102,10 +131,13 @@ public class Calling extends PApplet
 		imageMap.put("squirrel", new FallingImage(loadLocalImage("squirrel.png")));
 		imageMap.put("rainbow", new FallingImage(loadLocalImage("rainbow.png")));
 		imageMap.put("fish", new FlyingImage(loadLocalImage("fish.png")));
-		imageMap.put("heart", new FallingImage(loadLocalImage("heart.png")));
+		imageMap.put("<3", new FallingImage(loadLocalImage("heart.png")));
 		imageMap.put("madmen", new FallingImage(loadLocalImage("madmen.png")));
 		imageMap.put("pigsfly", new FlyingImage(loadLocalImage("pigsFly.png")));
 		imageMap.put("shark", new FlyingImage(loadLocalImage("sharkparty.png")));
+		
+	//	imageMap.put("she", new FallingImage(loadLocalImage("dog.png")));
+	//	imageMap.put("love", new FlyingImage(loadLocalImage("sharkparty.png")));
 	}
 
 	public PImage loadLocalImage(String name)
@@ -124,7 +156,7 @@ public class Calling extends PApplet
 		try
 		{
 			tb.setUserImage(loadImage(tweet.getProfileImageUrl(), "png"));
-			System.out.println("Profile Image:" + tweet.getProfileImageUrl());
+		//	System.out.println("Profile Image:" + tweet.getProfileImageUrl());
 		}
 		catch(Exception ex)
 		{
@@ -137,9 +169,8 @@ public class Calling extends PApplet
 		{
 			try
 			{
-			tb.setImage(loadImage(mediaEntities[0].getMediaURLHttps().toString()));
-
-			System.out.println("Media Content: " + mediaEntities[0].getMediaURLHttps().toString());
+				tb.setImage(loadImage(mediaEntities[0].getMediaURLHttps().toString()));
+			//	System.out.println("Media Content: " + mediaEntities[0].getMediaURLHttps().toString());
 			}
 			catch(Exception ex)
 			{
@@ -156,84 +187,69 @@ public class Calling extends PApplet
 	 */
 	public void draw()
 	{
-		background(1);		
+		background(bg);		
 
-		if(lastY <= 0)
+		if (chirps.size() < 8)
 		{
+			int index = chirps.size() -1;
 			TwitterBox temp = Shared.TWEETS.poll();
-			
-			System.out.println("Getting tweet...");
 
 			if(temp != null)
-			{
-				if(temp.getImageHeight() > 0)
-				{
-					temp.setY(-1 * temp.getImageHeight());
-					lastY = temp.getImageHeight() + 120;
-					System.out.println("SET: " + lastY);
+			{	
+				parseEasterEggKeywords(temp);
+				parseColor(temp);
+				
+				// determine the starting location for this twitterbox.
+				int previousTweetLocation = 0;
+				if(index >= 0)
+				{ 
+					TwitterBox previous = chirps.get(index);
+					previousTweetLocation = previous.getY();
 				}
-				else
-				{
-					lastY = 120;
-				}
+				int offset = temp.getImageHeight() + temp.getHeight() + 52;
+				temp.setY(previousTweetLocation - offset);
 				chirps.add(temp);
 			}
-			else
-			{
-				lastY = 120;
-			}
-		}
-		else
-		{
-			lastY--;
 		}
 		
-		for(int i = 0 ; i < chirps.size() ; i++)
+		for(int i = 0; i < chirps.size();)
 		{
-			TwitterBox chirp = chirps.poll();
-		
+			//System.out.println("Chirp count: " + chirps.size());
+			//System.out.println("TWEETS count: " + Shared.TWEETS.size());
+			TwitterBox chirp = chirps.get(i);
 			if(chirp.getY() > height)
 			{
+				chirps.remove(chirp);
 				chirp = null;
-				System.out.println("Setting to null: + " + chirps.size());
+			//	System.out.println("Setting to null: + " + chirps.size());
 
-				System.out.println("Chirp count: " + chirps.size());
-				System.out.println("TWEETS count: " + Shared.TWEETS.size());
+			//	System.out.println("Chirp count: " + chirps.size());
+			//	System.out.println("TWEETS count: " + Shared.TWEETS.size());
 			}
 			else
 			{
 				renderer.updateTwitterBox(chirp);
-				chirps.add(chirp);
+				i++;
 			}
 		}
-		
-		for(int i = 0 ; i < PICS.size() ; i++)
+		for(IMovingImage pic : imageQueue)
 		{
-			IMovingImage pic = PICS.poll();
+			renderer.updateImage(pic);
+		}
+		
+		// clean up any images that are now offscreen.
+		for(int i = 0 ; i < imageQueue.size();)
+		{
+			IMovingImage pic = imageQueue.get(i);
 			
-			if(pic.getY() > height)
+			if(pic.getX() > width || pic.getY() > height)
 			{
+				imageQueue.remove(pic);
 				pic = null;
 			}
 			else
 			{
-				renderer.updateImage(pic);
-				PICS.add(pic);
-			}
-		}
-		
-		for(int i = 0 ; i < FLYING_PICS.size() ; i++)
-		{
-			IMovingImage pic = FLYING_PICS.poll();
-			
-			if(pic.getX() > width)
-			{
-				pic = null;
-			}
-			else
-			{
-				renderer.updateImage(pic);
-				FLYING_PICS.add(pic);
+				i++;
 			}
 		}
 		image(bannerImage, 0, 0);
@@ -246,8 +262,6 @@ public class Calling extends PApplet
 		{
 			Shared.TWEETS = new LinkedList<TwitterBox>();
 		}
-		//WAIT = false;
-
 	}
 	
 	static public void main(String args[]) 
@@ -285,11 +299,11 @@ public class Calling extends PApplet
 		}
 		if(key == '1')
 		{
-			PICS.add(new FallingImage(loadLocalImage("m2o_banner2.png"), "noMove"));
+			imageQueue.add(new FallingImage(loadLocalImage("m2o_banner2.png"), "noMove"));
 		}
 		if(key == '2')
 		{
-			PICS.add(new FallingImage(loadLocalImage("m2o_banner2.png"), "random"));
+			imageQueue.add(new FallingImage(loadLocalImage("m2o_banner2.png"), "random"));
 		}
 		if(key == 'x')
 		{
@@ -334,10 +348,7 @@ public class Calling extends PApplet
 		
 		if(key == 'e')
 		{
-			while(FLYING_PICS.size() > 0)
-			{
-				FLYING_PICS.poll();
-			}
+			imageQueue.clear();
 		}
 		
 		if (key == '/')

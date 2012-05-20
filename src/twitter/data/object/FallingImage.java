@@ -37,7 +37,7 @@ public class FallingImage implements IMovingImage
 		
 		if(noMove.equals("random"))
 		{
-			speed = 1 + randomGenerator.nextInt(4);
+			speed = 2 + randomGenerator.nextInt(4);
 		}
 		else
 		{

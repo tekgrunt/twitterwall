@@ -52,7 +52,7 @@ public class TwitterThread extends Thread
 	@Override
 	public void run()
 	{
-		System.out.println("*** Inside Thread 1 ***");
+	//	System.out.println("*** Inside Thread 1 ***");
 		myTwitter = new TwitterFactory().getInstance();
 		myTwitter.setOAuthConsumer("DataVisual", "m2blowme2012");	
 
@@ -101,22 +101,20 @@ public class TwitterThread extends Thread
 		// setting the number of results we want
 		query = new Query(topic);
 		query.setSinceId(filterSinceId);
-		query.setRpp(20);	
+		query.setRpp(100);	
 		try 
 		{
 			//getting the tweets
 			result = myTwitter.search(query);
 			List<Tweet> tweets = result.getTweets();
 			
-			System.out.println("Query returned " + tweets.size());
+		//	System.out.println("Query returned " + tweets.size());
 			
 			for(Tweet t : tweets)
 			{
 				filterSinceId = Math.max(t.getId(), filterSinceId);
-				System.out.println("FilterKey: " + filterSinceId + " " + t.getCreatedAt());
+			//	System.out.println("FilterKey: " + filterSinceId + " " + t.getCreatedAt());
 			//	System.out.println("Adding new tweet for topic: " + topics.get(topicIndex));
-
-				String mediaEntry = "";
 
 				//this is where we are going to dump into the db
 				//webService.sendTweetData(t.getFromUserId(), t.getFromUser(), t.getText(), t.getProfileImageUrl(), t.getSource(), mediaEntry);
@@ -128,7 +126,7 @@ public class TwitterThread extends Thread
 				//System.out.println("*** Adding unique item");
 				Shared.TWEETS.add(inThePipe);
 				Calling.TWEET_COUNT++;
-				System.out.println("Tweet Count: " + Calling.TWEET_COUNT + "  TWEETS: " + Shared.TWEETS.size() + "  >>>  " + t.getText());
+			//	System.out.println("Tweet Count: " + Calling.TWEET_COUNT + "  TWEETS: " + Shared.TWEETS.size() + "  >>>  " + t.getText());
 			} 
 		} 
 		catch (TwitterException e) 

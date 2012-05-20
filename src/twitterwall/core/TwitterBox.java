@@ -28,8 +28,8 @@ public class TwitterBox
 	public int y = 0;
 	
 	public String first = "";
-	protected String second  = "";
-	private String colourToken = "white";
+	protected String second = "";
+	private String colorToken = "white";
 	Tweet chirp;
 	private long created;
 	private TweetSource source;
@@ -64,14 +64,29 @@ public class TwitterBox
 		return second;
 	}
 	
-	public String getTextColour()
+	public void setTextColor(String key)
 	{
-		return colourToken;
+		colorToken = key;
+	}
+	
+	public String getTextColor()
+	{
+		return colorToken;
 	}
 	
 	public TweetSource getSource()
 	{
 		return source;
+	}
+	
+	public String getText()
+	{
+		return this.chirp.getText();
+	}
+	
+	public int getHeight()
+	{
+		return (second.length() > 0) ? 80 : 52;
 	}
 	
 	public TwitterBox(Tweet tweet)
@@ -102,7 +117,7 @@ public class TwitterBox
 		{
 			 temp = st.nextToken() + " " + temp;
 		}
-
+		sanitize(input);
 		ArrayList<String> firstLine = new ArrayList<String>();
 		ArrayList<String> secondLine = new ArrayList<String>();
 		char[] chars = input.toCharArray();
@@ -118,17 +133,11 @@ public class TwitterBox
 			word = word + token;
 			if(token == ' ' && charCount < 80)
 			{
-				Calling.partyTime(word);
-				parseColour(word);
-				word = sanitize(word);
 				firstLine.add(word);
 				word = "";
 			} 
 			else if (token == ' ')
 			{
-				Calling.partyTime(word);
-				parseColour(word);
-				word = sanitize(word);
 				secondLine.add(word);
 				word = "";
 			}
@@ -136,88 +145,35 @@ public class TwitterBox
 		
 		if(chars.length < 80)
 		{
-			Calling.partyTime(word);
-			parseColour(word);
-			word = sanitize(word);
 			firstLine.add(word);
 		}
 		else
 		{
-			Calling.partyTime(word);
-			parseColour(word);
-			word = sanitize(word);
 			secondLine.add(word);
 		}
 		
 		for(String f : firstLine)
 		{
-			first = first + f;
+			first += f;
 		}
 		
 		for(String s : secondLine)
 		{
-			second = second + s;
+			second += s;
 		}
 	}
 
-	private void parseColour(String token)
-	{
-		token = token.trim().replace("#", "").toLowerCase();
-		
-		if(token.equalsIgnoreCase("white"))
-		{
-			colourToken = "white";
-		}
-		else if(token.equalsIgnoreCase("blue"))
-		{
-			colourToken = "blue";
-		}
-		else if(token.equalsIgnoreCase("red"))
-		{
-			colourToken = "red";
-		}
-		else if(token.equalsIgnoreCase("green"))
-		{
-			colourToken = "green";
-		}
-		else if(token.equalsIgnoreCase("yellow"))
-		{
-			colourToken = "yellow";
-		}
-		else if(token.equalsIgnoreCase("pink"))
-		{
-			colourToken = "pink";
-		}
-		else if(token.equalsIgnoreCase("purple"))
-		{
-			colourToken = "purple";
-		}
-		else if(token.equalsIgnoreCase("brown"))
-		{
-			colourToken = "brown";
-		}
-		else if(token.equalsIgnoreCase("orange"))
-		{
-			colourToken = "orange";
-		}
-	}
-	
 	/*
 	 * Checks for common swear words and replaces them with fitting substitutes.
 	 */
-	public String sanitize(String token)
+	public String sanitize(String text)
 	{
-		token.trim();
-		if(token.equalsIgnoreCase("fuck") || token.trim().equalsIgnoreCase("cunt"))
-			return "bleep ";
-		else if(token.equalsIgnoreCase("fucking"))
-			return "bleeping ";
-		else if(token.equalsIgnoreCase("fucker"))
-			return "bleeper ";
-		else if(token.equalsIgnoreCase("shit"))
-			return "poo ";
-		
-		return token;
+		text.trim();
+		text.replace("\n", "");
+		text.replace("fuck", "bleep");
+		text.replace("cunt", "bleep");
+		text.replace("shit", "poop");
+		return text;
 	}
 	
 	/*

@@ -24,6 +24,11 @@ public class Renderer
 		buildSourceMap();
 	}
 	
+	public HashMap<String, Color> getColorMap()
+	{
+		return colorMap;
+	}
+	
 	public PFont getFont()
 	{
 		return font;
@@ -67,13 +72,10 @@ public class Renderer
 		colorMap.put("brown", new Color(188, 113, 5));
 		colorMap.put("orange", new Color(247,167,12));
 		colorMap.put("white", new Color(250, 250, 250));
-	}
-	
-	private void colourTweetText(String color)
-	{	
-		Color c = (colorMap.containsKey(color)) ? colorMap.get(color) : colorMap.get("white");
-		this.p.stroke(c.getRed(), c.getGreen(), c.getBlue());
-		this.p.fill(c.getRed(), c.getGreen(), c.getBlue());
+		
+//		colorMap.put("my", new Color(250, 250, 0));
+//		colorMap.put("so", new Color(249, 74, 173));
+//		colorMap.put("rt", new Color(203, 25, 201));
 	}
 	
 	/*
@@ -81,27 +83,36 @@ public class Renderer
 	 */
 	public void updateTwitterBox(TwitterBox box)
 	{
-		box.y += 1;
-		p.textFont(font);
+		int offset = 0;
 		
-		colourTweetText(box.getTextColour());
+		box.y++;
+		p.textFont(font);
 
-		if(box.getSecondLine() == null || box.getSecondLine().length() == 0)
+		Color c = (colorMap.containsKey(box.getTextColor())) ? colorMap.get(box.getTextColor()) : colorMap.get("white");
+		this.p.fill(0, 0, 0);
+		this.p.stroke(c.getRed(), c.getGreen(), c.getBlue());
+		p.rect(box.x + 65, box.y, 890, box.getHeight());
+		
+		this.p.fill(c.getRed(), c.getGreen(), c.getBlue());
+		p.text(box.getFirstLine(), box.x + 80, box.y + 34);
+		
+		if(box.getSecondLine().length() != 0)
 		{
-			p.text(box.getFirstLine(), box.x + 70, box.y + 30);
-		}
-		else
-		{
-			p.text(box.getFirstLine(), box.x + 70, box.y + 15);
-			p.text(box.getSecondLine(), box.x + 70, box.y + 45);	
+			p.text(box.getSecondLine(), box.x + 80, box.y + 64);
+			offset = 14;
 		}
 		if(box.getUserImage() != null)
 		{
-			p.image(box.getUserImage(), box.x, box.y);
+			// draw a 2px border around the user picture. Then draw the picture.
+			int imageX = 6 + box.x;
+			int imageY = offset + box.y;
+			this.p.fill(250, 250, 250);
+			p.rect(imageX, imageY, 51, 51);
+			p.image(box.getUserImage(), imageX + 2, imageY + 2);
 		}
 		if(box.getSource() != TweetSource.Unknown)
 		{
-			p.image(sourceMap.get(box.getSource()), box.x + 964 + 10, box.y);
+			p.image(sourceMap.get(box.getSource()), box.x + 964, box.y + offset);
 		}
 		if(box.getImage() != null)
 		{

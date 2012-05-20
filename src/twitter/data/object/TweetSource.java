@@ -53,7 +53,7 @@ public enum TweetSource
 		{
 			return TweetSource.Plume;
 		}
-		else if(url.contains("http://ubersocial.com"))
+		else if(url.contains("ubersocial.com"))
 		{
 			return TweetSource.Ubersocial;
 		}
