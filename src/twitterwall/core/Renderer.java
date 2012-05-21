@@ -93,6 +93,9 @@ public class Renderer
 		sourceMap.put(TweetSource.Tweetcaster, loadIcon("tweetcaster.png"));
 		sourceMap.put(TweetSource.TweetDeck, loadIcon("tweetdeck.png"));
 		sourceMap.put(TweetSource.TwitterFeed, loadIcon("twitterfeed.png"));
+		sourceMap.put(TweetSource.Twicca, loadIcon("twicca.png"));
+		sourceMap.put(TweetSource.SocialOomph, loadIcon("socialoomph.png"));
+		sourceMap.put(TweetSource.Buffer, loadIcon("buffer.png"));
 	}
 	
 	private PImage loadIcon(String name)
@@ -105,20 +108,16 @@ public class Renderer
 	private void buildColorMap()
 	{
 		colorMap = new HashMap<String, Color>();
-		colorMap.put("blue", Color.blue);
+		colorMap.put("blue", new Color(102, 153, 255));
 		colorMap.put("red", Color.red);
 		colorMap.put("green", Color.green);
 		colorMap.put("yellow", Color.yellow);
-		colorMap.put("pink", Color.pink);
+		colorMap.put("pink", new Color(255, 153, 204));
 		colorMap.put("purple", Color.magenta);
 		colorMap.put("brown", new Color(188, 113, 5));
 		colorMap.put("orange", Color.orange);
 		colorMap.put("white", Color.white);
-		
-//		colorMap.put("my", new Color(250, 250, 0));
-//		colorMap.put("so", new Color(249, 74, 173));
-		colorMap.put("rt", Color.cyan);
-		colorMap.put("this", Color.orange);
+		colorMap.put("rt", new Color(153, 204, 255));
 	}
 	
 	/*
@@ -127,7 +126,11 @@ public class Renderer
 	public void updateTwitterBox(TwitterBox box)
 	{
 		int offset = 0;
-		
+		if(box.y > 0 && !box.isCheckedForKeywords())
+		{
+			box.isCheckedForKeywords(true);
+			p.parseEasterEggKeywords(box);
+		}
 		box.y++;
 		p.textFont(font);
 
@@ -169,7 +172,7 @@ public class Renderer
 		if(box.getImage() != null)
 		{
 			PImage image = box.getImage();
-			p.image(box.getImage(), box.x + 200, box.y + 100);	
+			p.image(image, (p.width - image.width) / 2, box.y + box.getHeight() + 7);	
 		}
 	}
 	

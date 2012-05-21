@@ -25,6 +25,7 @@ public class Shared
 	public static final String BackgroundsFolder = "backgrounds/";
 	
 	public static final int IconSize = 48;
+	public static final int BackgroundSwitchAmount = 10;
 	
 	public static boolean WEBSERVICE_ENABLED = true;
 }

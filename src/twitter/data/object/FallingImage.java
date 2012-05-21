@@ -25,7 +25,7 @@ public class FallingImage implements IMovingImage
 		this.image = image;
 		y = -1 * image.height;
 		x = randomGenerator.nextInt(1024 - (image.width / 2));
-		speed = 1 + randomGenerator.nextInt(4);
+		speed = 2 + randomGenerator.nextInt(3);
 	}
 	
 	public FallingImage(PImage image, String noMove)
@@ -41,7 +41,7 @@ public class FallingImage implements IMovingImage
 		}
 		else
 		{
-			speed = 1;// + randomGenerator.nextInt(4);
+			speed = 2;
 		}
 	}
 

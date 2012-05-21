@@ -1,14 +1,22 @@
 package twitterwall.core;
 
+import java.io.InputStream;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.StringTokenizer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import processing.core.PApplet;
 import processing.core.PImage;
+
 import twitter.data.object.FallingImage;
 import twitter.data.object.FlyingImage;
 import twitter.data.object.IMovingImage;
+import twitter.data.object.TweetSource;
 import twitter4j.MediaEntity;
 import twitter4j.Tweet;
 /**
@@ -33,6 +41,8 @@ public class Calling extends PApplet
 	private TwitterThread tweetThread;
 	private Renderer renderer;
 
+	private static Pattern instagramURLPattern = Pattern.compile("og:image\" content=\"([^\"]+)", Pattern.MULTILINE);
+	
 	//I think I was just using this to get a rough count of how many Tweets had run... should probably go to sleep.
 	int tweetCount = 0;
 	
@@ -54,7 +64,7 @@ public class Calling extends PApplet
 	/*
 	 * The easter egg detector for cat party and friends
 	 */
-	private void parseEasterEggKeywords(TwitterBox box)
+	public void parseEasterEggKeywords(TwitterBox box)
 	{
 		// Check for keywords...
 		StringTokenizer st = new StringTokenizer(box.getText().toLowerCase(), " ");
@@ -119,9 +129,9 @@ public class Calling extends PApplet
 		imageMap.put("pigsfly", new FlyingImage(loadLocalImage("pigsFly.png")));
 		imageMap.put("shark", new FlyingImage(loadLocalImage("sharkparty.png")));
 		
-		imageMap.put("she", new FallingImage(loadLocalImage("dog.png")));
-		imageMap.put("you", new FlyingImage(loadLocalImage("sharkparty.png")));
-		imageMap.put("my", new FlyingImage(loadLocalImage("fish.png")));
+		imageMap.put("and", new FallingImage(loadLocalImage("dog.png")));
+		imageMap.put("if", new FlyingImage(loadLocalImage("sharkparty.png")));
+		imageMap.put("to", new FlyingImage(loadLocalImage("fish.png")));
 		imageMap.put("so", new FallingImage(loadLocalImage("squirrel.png")));
 	}
 	
@@ -168,7 +178,61 @@ public class Calling extends PApplet
 				ex.printStackTrace();
 			}
 		}
+		else if (tb.getSource() == TweetSource.Instagram)
+		{
+			processInstagramTweet(tb);
+		}
 		return tb;
+	}
+	
+	private void processInstagramTweet(TwitterBox tb)
+	{
+		InputStream reader = null;
+		try
+		{
+			int index = tb.getText().indexOf("http://t.co");
+			if(index > 0)
+			{
+				String path = tb.getText().substring(index);
+				URL url = new URL(path);
+				url.openConnection();
+				
+				byte[] buffer = new byte[10000];
+				reader = url.openStream();
+		        while (reader.read(buffer) > 0)
+		        { 
+		        	String s = new String(buffer, "UTF-8");
+		        	Matcher matcher = instagramURLPattern.matcher(s);
+		        	if(matcher.find())
+		        	{
+			        	//System.out.println(matcher.group(1));
+			        	tb.setImage(loadImage(matcher.group(1)));
+		        	}
+		        }
+			}
+		}
+		catch (MalformedURLException ex)
+		{
+			System.out.println("Requested URL was malformed.");
+			ex.printStackTrace();
+		}
+		catch (IOException ex)
+		{
+			ex.printStackTrace();
+		}
+		finally
+		{
+			if(reader != null)
+			{
+				try
+				{
+					reader.close();
+				}
+				catch(Exception ex)
+				{
+				}
+			}
+		}
 	}
 	
 	/*
@@ -187,11 +251,10 @@ public class Calling extends PApplet
 			if(temp != null)
 			{	
 				RenderedTweetCount++;
-				if(RenderedTweetCount % 2 == 0)
+				if(RenderedTweetCount % Shared.BackgroundSwitchAmount == 0)
 				{
 					renderer.nextBackground();
 				}
-				parseEasterEggKeywords(temp);
 				parseColor(temp);
 				
 				// determine the starting location for this twitterbox.

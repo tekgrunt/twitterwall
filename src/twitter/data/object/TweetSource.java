@@ -16,6 +16,9 @@ public enum TweetSource
 	TweetDeck,
 	Tweetcaster,
 	Tweetbot,
+	Twicca,
+	SocialOomph,
+	Buffer,
 	Hootsuite;
 
 	
@@ -76,6 +79,18 @@ public enum TweetSource
 		else if(url.contains("http://www.tweetdeck.com"))
 		{
 			return TweetSource.TweetDeck;
+		}
+		else if(url.contains("http://www.socialoomph.com"))
+		{
+			return TweetSource.SocialOomph;
+		}
+		else if(url.contains(">twicca"))
+		{
+			return TweetSource.Twicca;
+		}
+		else if(url.contains("http://bufferapp.com"))
+		{
+			return TweetSource.Buffer;
 		}
 		else
 		{

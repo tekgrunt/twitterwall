@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import twitter.data.object.TweetData;
+import twitter.data.object.TweetSource;
 import twitter.data.webservice.WebService;
 import twitter4j.Query;
 import twitter4j.QueryResult;
@@ -11,7 +12,7 @@ import twitter4j.Tweet;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
 import twitter4j.TwitterFactory;
-import twitterwall.data.local.DataConnection;
+import twitterwall.data.connection.DataConnection;
 
 import com.mysql.jdbc.Connection;
 
@@ -55,7 +56,7 @@ public class TwitterThread extends Thread
 		myTwitter = new TwitterFactory().getInstance();
 		myTwitter.setOAuthConsumer("DataVisual", "m2blowme2012");	
 
-		topics.add("fuck");
+		topics.add("beautiful");
 //		topics.add("#ifonlyyoucould");
 //		topics.add("#Thingsthatpissmeoffinthemorning");
 //		topics.add("#twitterbirsokakolsaydi");
@@ -119,7 +120,7 @@ public class TwitterThread extends Thread
 				//webService.sendTweetData(t.getFromUserId(), t.getFromUser(), t.getText(), t.getProfileImageUrl(), t.getSource(), mediaEntry);
 				if(Shared.LOCAL_DB_ENABLED)
 				{
-					dataConnection.enterTweetData(t);
+				//	dataConnection.enterTweetData(t);
 				}
 				
 				if(Shared.WEBSERVICE_ENABLED)
@@ -128,6 +129,7 @@ public class TwitterThread extends Thread
 				}
 				//System.out.println("*** Adding unique item");
 				Shared.TWEETS.add(p.createTwitterBox(t));
+
 				Calling.TotalTweetCount++;
 			//	System.out.println("Tweet Count: " + Calling.TWEET_COUNT + "  TWEETS: " + Shared.TWEETS.size() + "  >>>  " + t.getText());
 			} 

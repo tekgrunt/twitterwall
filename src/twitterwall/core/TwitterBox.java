@@ -28,6 +28,8 @@ public class TwitterBox
 	public int y = 0;
 	private long created;
 	
+	private boolean checkedForKeywords = false;
+	
 	public String first = "";
 	protected String second = "";
 	private String colorToken = "white";
@@ -72,6 +74,16 @@ public class TwitterBox
 	public String getTextColor()
 	{
 		return colorToken;
+	}
+	
+	public boolean isCheckedForKeywords()
+	{
+		return checkedForKeywords;
+	}
+	
+	public void isCheckedForKeywords(boolean bool)
+	{
+		checkedForKeywords = bool;
 	}
 	
 	public TweetSource getSource()
@@ -173,8 +185,8 @@ public class TwitterBox
 	 */
 	public void killTweet()
 	{		
-		first = "";
-		second = "";
+	//	first = "";
+	//	second = "";
 	}
 
 	public int getX() 
@@ -199,6 +211,7 @@ public class TwitterBox
 	
 	public void dispose()
 	{
+		this.userImage = null;
 		this.tweetImage = null;
 		this.chirp = null;
 	}
