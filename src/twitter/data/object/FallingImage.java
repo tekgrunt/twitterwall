@@ -18,7 +18,13 @@ public class FallingImage implements IMovingImage
 	private int x;
 	private int y;
 	private int speed;
-
+	private boolean isFullScreen;	
+	
+	public boolean isFullScreen()
+	{
+		return isFullScreen;
+	}
+	
 	public FallingImage(PImage image)
 	{
 		Random randomGenerator = new Random();
@@ -34,7 +40,7 @@ public class FallingImage implements IMovingImage
 		this.image = image;
 		y = -1 * image.height;
 		x = 0;
-		
+		isFullScreen = true;
 		if(noMove.equals("random"))
 		{
 			speed = 2 + randomGenerator.nextInt(4);

@@ -3,13 +3,13 @@ package twitterwall.core;
 import java.awt.Color;
 import java.io.File;
 import java.io.FilenameFilter;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
 
 import processing.core.PFont;
 import processing.core.PImage;
 import twitter.data.object.IMovingImage;
+import twitter.data.object.Question;
 import twitter.data.object.TweetSource;
 
 public class Renderer 
@@ -38,6 +38,7 @@ public class Renderer
 	{
 		this.p = p;
 		font = p.loadFont("fonts/Verdana-20.vlw");
+		p.textFont(font);
 		buildColorMap();
 		buildSourceMap();
 		loadBackgrounds();
@@ -156,7 +157,6 @@ public class Renderer
 			p.parseEasterEggKeywords(box);
 		}
 		box.y++;
-		p.textFont(font);
 
 		// draw the background for the tweet text.
 		Color c = (colorMap.containsKey(box.getTextColor())) ? colorMap.get(box.getTextColor()) : colorMap.get("white");
@@ -213,8 +213,48 @@ public class Renderer
 		{
 			p.image(restricted, 100, 120);
 		}
+		renderQuestion();
 	}
 
+	public void renderQuestion()
+	{
+		Question question = p.getCurrentQuestion();
+		if(question != null)
+		{
+			if(question.isAnsweredCorrectly())
+			{
+				// draw the user's profile image.
+				if(question.correctAnswerUserImage() != null)
+				{
+					// draw a 2px border around the user picture. Then draw the picture.
+					int imageX = 6;
+					int imageY = 20;
+					this.p.fill(250, 250, 250);
+					this.p.stroke(250, 250, 250);
+					p.rect(imageX, imageY, 51, 51);
+					p.image(question.correctAnswerUserImage(), imageX + 2, imageY + 2);
+				}
+				
+				// show the answer.
+				this.p.fill(0, 0, 0);
+				this.p.stroke(250, 250, 0);
+				p.rect(65, 16, 890, 60);
+				this.p.fill(250, 250, 0);
+				p.text("Answer: " + question.getAnswerText(), 80, 24, 870, 20);
+				p.text("Winner: @" + question.correctAnswerUserName(), 80, 50, 870, 20);
+			}
+			else
+			{
+				//show the question.
+				this.p.fill(0, 0, 0);
+				this.p.stroke(250, 250, 250);
+				p.rect(65, 16, 890, 60);
+				this.p.fill(250, 250, 250);
+				p.text("Question: " + question.getQuestionText(), 80, 24, 870, 50);
+			}
+		}
+	}
+	
 	public void renderBackground() 
 	{
 		if(showBackground)

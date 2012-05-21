@@ -3,7 +3,6 @@ package twitterwall.core;
 import java.util.ArrayList;
 import java.util.List;
 
-import twitter.data.object.TweetData;
 import twitter.data.object.TweetSource;
 import twitter.data.webservice.WebService;
 import twitter4j.Query;
@@ -71,7 +70,7 @@ public class TwitterThread extends Thread
 				{
 					Thread.sleep(2000);
 					
-					if(Shared.TWEETS.size() < 20)
+					if(p.queuedTweetCount() < 20)
 					{
 						getTweet(topics.get(i), i);
 					}
@@ -127,10 +126,10 @@ public class TwitterThread extends Thread
 				{
 					//call here
 				}
+			
 				//System.out.println("*** Adding unique item");
-				Shared.TWEETS.add(p.createTwitterBox(t));
+				p.addNewTweet(t);
 
-				Calling.TotalTweetCount++;
 			//	System.out.println("Tweet Count: " + Calling.TWEET_COUNT + "  TWEETS: " + Shared.TWEETS.size() + "  >>>  " + t.getText());
 			} 
 		} 
