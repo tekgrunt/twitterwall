@@ -1,6 +1,9 @@
 package twitterwall.core;
 
 import java.awt.Color;
+import java.io.File;
+import java.io.FilenameFilter;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedList;
 
@@ -55,14 +58,35 @@ public class Renderer
 	
 	private void loadBackgrounds()
 	{
-		backgrounds.add(p.loadLocalBackground("02182_campmeekerwaterfall_1024x768.jpg"));
-		backgrounds.add(p.loadLocalBackground("01665_streamssun_1024x768.jpg"));
-		backgrounds.add(p.loadLocalBackground("02110_lowerfallsyellowstone_1024x768.jpg"));
-		backgrounds.add(p.loadLocalBackground("02118_waterfall_1024x768.jpg"));
-		backgrounds.add(p.loadLocalBackground("02174_gazeduponbyangelsintheirflight_1024x768.jpg"));
-		backgrounds.add(p.loadLocalBackground("02291_yosemitefalls_1024x768.jpg"));
-		backgrounds.add(p.loadLocalBackground("02414_blackforest_1024x768.jpg"));
-		backgrounds.add(p.loadLocalBackground("02449_burneyfalls_1024x768.jpg"));
+		try
+		{
+			File dir = new File(new File(".").getCanonicalPath() + File.separator + "bin" + File.separator + Shared.BackgroundsFolder);
+			FilenameFilter filter = new FilenameFilter() {
+			    public boolean accept(File dir, String name) 
+			    {
+			        return name.endsWith(".jpg");
+			    }
+			};
+			for(String bg : dir.list(filter))
+			{
+				backgrounds.add(p.loadLocalBackground(bg));
+			}
+		}
+		catch(Exception ex)
+		{
+			
+		}
+		if(backgrounds.size() == 0)
+		{
+			backgrounds.add(p.loadLocalBackground("02182_campmeekerwaterfall_1024x768.jpg"));
+			backgrounds.add(p.loadLocalBackground("01665_streamssun_1024x768.jpg"));
+			backgrounds.add(p.loadLocalBackground("02110_lowerfallsyellowstone_1024x768.jpg"));
+			backgrounds.add(p.loadLocalBackground("02118_waterfall_1024x768.jpg"));
+			backgrounds.add(p.loadLocalBackground("02174_gazeduponbyangelsintheirflight_1024x768.jpg"));
+			backgrounds.add(p.loadLocalBackground("02291_yosemitefalls_1024x768.jpg"));
+			backgrounds.add(p.loadLocalBackground("02414_blackforest_1024x768.jpg"));
+			backgrounds.add(p.loadLocalBackground("02449_burneyfalls_1024x768.jpg"));
+		}
 	}
 	
 	public void toggleBackground()
