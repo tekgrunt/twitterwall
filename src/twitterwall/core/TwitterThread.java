@@ -56,6 +56,8 @@ public class TwitterThread extends Thread
 		myTwitter.setOAuthConsumer("DataVisual", "m2blowme2012");	
 
 		topics.add("beautiful");
+		
+		
 //		topics.add("#ifonlyyoucould");
 //		topics.add("#Thingsthatpissmeoffinthemorning");
 //		topics.add("#twitterbirsokakolsaydi");
@@ -64,21 +66,20 @@ public class TwitterThread extends Thread
 		
 		while(true)
 		{
-			for(int i = 0 ; i < topics.size() ; i++)
+			if(p.queuedTweetCount() < 20)
 			{
-				try 
+				for(int i = 0 ; i < topics.size() ; i++)
 				{
-					Thread.sleep(2000);
-					
-					if(p.queuedTweetCount() < 20)
+					try 
 					{
+						Thread.sleep(2000);
 						getTweet(topics.get(i), i);
+					} 
+					
+					catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
-				} 
-				
-				catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
 				}
 			}
 		}
