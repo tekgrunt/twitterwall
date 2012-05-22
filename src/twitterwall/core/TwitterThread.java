@@ -3,7 +3,6 @@ package twitterwall.core;
 import java.util.ArrayList;
 import java.util.List;
 
-import twitter.data.object.TweetSource;
 import twitter.data.webservice.WebService;
 import twitter4j.Query;
 import twitter4j.QueryResult;
@@ -56,47 +55,31 @@ public class TwitterThread extends Thread
 		myTwitter = new TwitterFactory().getInstance();
 		myTwitter.setOAuthConsumer("DataVisual", "m2blowme2012");	
 
-		topics.add("#qazwsx");
-//		topics.add("booty");
-//		topics.add("#BlitzBagi2iPhoneCaseIAm");
+		topics.add("beautiful");
+		
+//		topics.add("#ifonlyyoucould");
+//		topics.add("#Thingsthatpissmeoffinthemorning");
+//		topics.add("#twitterbirsokakolsaydi");
 //		topics.add("#BabyHorse");
 //		topics.add("Romney 39");
-		
-		int adminCycle = 0;
-		
+				
 		while(true)
 		{			
-			for(int i = 0 ; i < topics.size() ; i++)
+			if(p.queuedTweetCount() < 20)
 			{
-				try 
+				for(int i = 0 ; i < topics.size() ; i++)
 				{
-					Thread.sleep(2000);
-				
-					/*
-					 * I agree with keeping the tweet requests down but for this event where we are going to be doing the 
-					 * admin over twitter we have to monitor the admin channel closer... none of it is hyper critical but 
-					 * should take effect within a couple of minutes. This issue is another strong argument for a web client
-					 * as we can poll our DB as much as we want and probably get quite snappy response times.
-					 */
-					if(p.queuedTweetCount() < 10)
+					try 
 					{
-						getTweet(topics.get(i), i);
-					}
-					if (adminCycle > Shared.ADMIN_CYCLE)
+						Thread.sleep(2000);
+					} 
+					catch (InterruptedException e) 
 					{
-						getTweet(Shared.ADMIN_TAG, i);
-						adminCycle = 0;
+						e.printStackTrace();
 					}
-					else
-					{
-						adminCycle++;
-					}
+		
+					getTweet(topics.get(i), i);
 				} 
-				
-				catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
 			}
 		}
 	}
