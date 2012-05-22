@@ -51,12 +51,11 @@ public class TwitterThread extends Thread
 	@Override
 	public void run()
 	{
-	//	System.out.println("*** Inside Thread 1 ***");
 		myTwitter = new TwitterFactory().getInstance();
 		myTwitter.setOAuthConsumer("DataVisual", "m2blowme2012");	
 
 		topics.add("beautiful");
-				
+		
 		long startTime = System.currentTimeMillis();
 		
 		while(true)
@@ -75,7 +74,6 @@ public class TwitterThread extends Thread
 			
 			if(p.queuedTweetCount() < 20)
 			{
-
 				for(int i = 0 ; i < topics.size() ; i++)
 				{
 					try 
@@ -122,20 +120,10 @@ public class TwitterThread extends Thread
 				}
 				else
 				{
-					System.out.println("Tweet from: " + t.getFromUser());
-					for(String temp : blockedUsers)
-					{
-						System.out.println("*** : " + temp);
-					}
-					
 					//don't show tweets from user that we block
 					if(!blockedUsers.contains(t.getFromUser()))
 					{
 						p.addNewTweet(t);
-					}
-					else
-					{
-						System.out.println("Blocked: " + t.getFromUser());
 					}
 				}
 				//no matter what we are storing the tweet data
@@ -174,10 +162,8 @@ public class TwitterThread extends Thread
 	{
 		tweet = tweet.trim();
 		String[] temp = tweet.split(" ");
-		
-		System.out.println("ADMIN TWEET: " + tweet);
-		
-		if(temp.length >= 3)
+				
+		if(temp.length >= 3)//prevents null access
 		{
 			if(temp[1].equalsIgnoreCase("#add"))
 			{
@@ -192,17 +178,14 @@ public class TwitterThread extends Thread
 			}
 			else if(temp[1].equalsIgnoreCase("#block"))
 			{
-				System.out.println("Inside Blocker");
 				if(!blockedUsers.contains(temp[2].toLowerCase()))
 				{
 					blockedUsers.add(temp[2].toLowerCase());
-					System.out.println(">>>> Blocking user");
 				}
 			}
 			else if(temp[1].equalsIgnoreCase("#unblock"))
 			{
 				blockedUsers.remove(temp[2].toLowerCase());
-				System.out.println(">>>> Unblocking user");
 			}
 		}
 		
