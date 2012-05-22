@@ -1,9 +1,10 @@
 package twitterwall.core;
 
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -13,7 +14,6 @@ import java.util.regex.Pattern;
 
 import processing.core.PApplet;
 import processing.core.PImage;
-
 import twitter.data.object.FallingImage;
 import twitter.data.object.FlyingImage;
 import twitter.data.object.IMovingImage;
@@ -49,6 +49,8 @@ public class Calling extends PApplet
 	private Renderer renderer;
 
 	private static Pattern instagramURLPattern = Pattern.compile("og:image\" content=\"([^\"]+)", Pattern.MULTILINE);
+	
+	private ArrayList<Question> listOfQuestions = new ArrayList<Question>();
 
 	/*
 	 * The setup() function is a processing method that runs once when the application is booted.
@@ -63,7 +65,7 @@ public class Calling extends PApplet
 		buildImageMap();
 		frameRate(30);
 		size(Shared.Width, Shared.Height);
-		currentQuestion = new Question("How much wood could a woodchuck chuck if a woodchuck could chuck wood?? How much wood could a woodchuck chuck if a woodchuck could chuck wood??", "love");
+		listOfQuestions.add(new Question("How much wood could a woodchuck chuck if a woodchuck could chuck wood?? How much wood could a woodchuck chuck if a woodchuck could chuck wood??", "love"));
 	}
 	
 	/*
@@ -383,9 +385,16 @@ public class Calling extends PApplet
 			System.out.println(keyCode);
 			renderer.nextBackground();
 		}
-		if (key == '.')
+		if (key == '1')
 		{
-			
+			if(currentQuestion == null)
+			{
+				currentQuestion = listOfQuestions.get(0);
+			}
+			else
+			{
+				currentQuestion = null;
+			}
 		}
 		if (key == 'b')
 		{
