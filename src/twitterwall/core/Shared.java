@@ -23,4 +23,9 @@ public class Shared
 	public static final int BackgroundSwitchAmount = 10;
 	
 	public static boolean WEBSERVICE_ENABLED = true;
+	
+	public static String ADMIN_USER = "yaletown2012";
+	public static String ADMIN_TAG = "#admintwm2o";
+	public static int ADMIN_CYCLE = 5;
+	
 }

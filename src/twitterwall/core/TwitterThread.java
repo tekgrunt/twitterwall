@@ -37,6 +37,7 @@ public class TwitterThread extends Thread
 	 * The topics array lets us cycle through and poll more than one topic.
 	 */
 	private ArrayList<String> topics = new ArrayList<String>();
+	private ArrayList<String> blockedUsers = new ArrayList<String>();
 
 	public TwitterThread(Calling p)
 	{
@@ -55,24 +56,40 @@ public class TwitterThread extends Thread
 		myTwitter = new TwitterFactory().getInstance();
 		myTwitter.setOAuthConsumer("DataVisual", "m2blowme2012");	
 
-		topics.add("beautiful");
-//		topics.add("#ifonlyyoucould");
-//		topics.add("#Thingsthatpissmeoffinthemorning");
-//		topics.add("#twitterbirsokakolsaydi");
+		topics.add("#qazwsx");
+//		topics.add("booty");
+//		topics.add("#BlitzBagi2iPhoneCaseIAm");
 //		topics.add("#BabyHorse");
 //		topics.add("Romney 39");
 		
+		int adminCycle = 0;
+		
 		while(true)
-		{
+		{			
 			for(int i = 0 ; i < topics.size() ; i++)
 			{
 				try 
 				{
 					Thread.sleep(2000);
-					
-					if(p.queuedTweetCount() < 20)
+				
+					/*
+					 * I agree with keeping the tweet requests down but for this event where we are going to be doing the 
+					 * admin over twitter we have to monitor the admin channel closer... none of it is hyper critical but 
+					 * should take effect within a couple of minutes. This issue is another strong argument for a web client
+					 * as we can poll our DB as much as we want and probably get quite snappy response times.
+					 */
+					if(p.queuedTweetCount() < 10)
 					{
 						getTweet(topics.get(i), i);
+					}
+					if (adminCycle > Shared.ADMIN_CYCLE)
+					{
+						getTweet(Shared.ADMIN_TAG, i);
+						adminCycle = 0;
+					}
+					else
+					{
+						adminCycle++;
 					}
 				} 
 				
@@ -86,56 +103,117 @@ public class TwitterThread extends Thread
 	
 	private long filterSinceId = 0;
 	
-	/*
-	 * Basically I am just polling the Twitter stream and pulling the top 3 items. This was a bit if a 
-	 * heuristic... if I remember correctly, when I had it set quite a bit higher (maybe 10 or 15?) the queue
-	 * was growing faster than it was falling off if the channels we were watching were very busy - I don't think
-	 * this will be a problem as it stands but it would be nice to address it in a more elegant way. Also, in theory 
-	 * we could miss some Tweets if more than 3 are posted within the 800 millisecond loop - I do think I saw
-	 * some of this type of during Illuminate. 
-	 */
 	private void getTweet(String topic, int topicIndex) 
 	{
 		// creating the query for the given topic
 		// setting the number of results we want
 		query = new Query(topic);
 		query.setSinceId(filterSinceId);
-		query.setRpp(100);	
+		query.setRpp(4);	
 		try 
 		{
 			//getting the tweets
 			result = myTwitter.search(query);
 			List<Tweet> tweets = result.getTweets();
 			
-		//	System.out.println("Query returned " + tweets.size());
+			System.out.println("Number of tweets: " + tweets.size() + " for topic " + topic);
 			
 			for(Tweet t : tweets)
 			{
 				filterSinceId = Math.max(t.getId(), filterSinceId);
-			//	System.out.println("FilterKey: " + filterSinceId + " " + t.getCreatedAt());
-			//	System.out.println("Adding new tweet for topic: " + topics.get(topicIndex));
-
-				//this is where we are going to dump into the db
-				//webService.sendTweetData(t.getFromUserId(), t.getFromUser(), t.getText(), t.getProfileImageUrl(), t.getSource(), mediaEntry);
-				if(Shared.LOCAL_DB_ENABLED)
+	
+				if(topic.equalsIgnoreCase(Shared.ADMIN_TAG))
 				{
-				//	dataConnection.enterTweetData(t);
+					if(t.getFromUser().equalsIgnoreCase(Shared.ADMIN_USER))
+					{
+						processAdminCommand(t.getText());
+					}
 				}
-				
-				if(Shared.WEBSERVICE_ENABLED)
+				else
 				{
-					//call here
+					System.out.println("Tweet from: " + t.getFromUser());
+					for(String temp : blockedUsers)
+					{
+						System.out.println("*** : " + temp);
+					}
+					
+					//don't show tweets from user that we block
+					if(!blockedUsers.contains(t.getFromUser()))
+					{
+						p.addNewTweet(t);
+					}
+					else
+					{
+						System.out.println("Blocked: " + t.getFromUser());
+					}
 				}
-			
-				//System.out.println("*** Adding unique item");
-				p.addNewTweet(t);
-
-			//	System.out.println("Tweet Count: " + Calling.TWEET_COUNT + "  TWEETS: " + Shared.TWEETS.size() + "  >>>  " + t.getText());
+				//no matter what we are storing the tweet data
+				processTweetData(t);
 			} 
 		} 
 		catch (TwitterException e) 
 		{
 			e.printStackTrace();
 		}
+	}
+	
+	private void processTweetData(Tweet t)
+	{
+		if(Shared.LOCAL_DB_ENABLED)
+		{
+		//	dataConnection.enterTweetData(t);
+		}
+		
+		if(Shared.WEBSERVICE_ENABLED)
+		{
+			//call here
+		}
+	}
+	
+	/*
+	 * We will expect admin texts to be of a specific format or we dump them.
+	 * We are going to split on the colon. The expected format will be as follows:
+	 * #admin #add searchterm 
+	 * #admin #remove searchterm
+	 * #admin #block username
+	 * #admin #question #on 1
+	 * #admin #question #off 2
+	 */
+	private void processAdminCommand(String tweet)
+	{
+		tweet = tweet.trim();
+		String[] temp = tweet.split(" ");
+		
+		System.out.println("ADMIN TWEET: " + tweet);
+		
+		if(temp.length >= 3)
+		{
+			if(temp[1].equalsIgnoreCase("#add"))
+			{
+				if(!topics.contains(temp[2].toLowerCase()))
+				{
+					topics.add(temp[2].toLowerCase());
+				}
+			}
+			else if(temp[1].equalsIgnoreCase("#remove"))
+			{	
+				topics.remove(temp[2].toLowerCase());
+			}
+			else if(temp[1].equalsIgnoreCase("#block"))
+			{
+				System.out.println("Inside Blocker");
+				if(!blockedUsers.contains(temp[2].toLowerCase()))
+				{
+					blockedUsers.add(temp[2].toLowerCase());
+					System.out.println(">>>> Blocking user");
+				}
+			}
+			else if(temp[1].equalsIgnoreCase("#unblock"))
+			{
+				blockedUsers.remove(temp[2].toLowerCase());
+				System.out.println(">>>> Unblocking user");
+			}
+		}
+		
 	}
 }
