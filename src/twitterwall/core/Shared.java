@@ -26,6 +26,6 @@ public class Shared
 	
 	public static String ADMIN_USER = "yaletown2012";
 	public static String ADMIN_TAG = "#admintwm2o";
-	public static int ADMIN_CYCLE = 5;
+	public static int ADMIN_CYCLE = 2;
 	
 }

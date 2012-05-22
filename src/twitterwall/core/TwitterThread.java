@@ -56,37 +56,45 @@ public class TwitterThread extends Thread
 		myTwitter.setOAuthConsumer("DataVisual", "m2blowme2012");	
 
 		topics.add("beautiful");
-		
-//		topics.add("#ifonlyyoucould");
-//		topics.add("#Thingsthatpissmeoffinthemorning");
-//		topics.add("#twitterbirsokakolsaydi");
-//		topics.add("#BabyHorse");
-//		topics.add("Romney 39");
 				
+		long startTime = System.currentTimeMillis();
+		
 		while(true)
-		{			
+		{
+			if(System.currentTimeMillis() > startTime + Shared.ADMIN_CYCLE * 1000)
+			{
+				/*
+				 * I agree with keeping the tweet requests down but for this event where we are going to be doing the 
+				 * admin over twitter we have to monitor the admin channel closer... none of it is hyper critical but 
+				 * should take effect within a couple of minutes. This issue is another strong argument for a web client
+				 * as we can poll our DB as much as we want and probably get quite snappy response times.
+				 */
+				getTweet(Shared.ADMIN_TAG);		
+				startTime = System.currentTimeMillis();
+			}
+			
 			if(p.queuedTweetCount() < 20)
 			{
+
 				for(int i = 0 ; i < topics.size() ; i++)
 				{
 					try 
 					{
 						Thread.sleep(2000);
+						getTweet(topics.get(i));
 					} 
-					catch (InterruptedException e) 
-					{
+					catch (InterruptedException e) {
+				
 						e.printStackTrace();
 					}
-		
-					getTweet(topics.get(i), i);
-				} 
+				}
 			}
 		}
 	}
-	
+		
 	private long filterSinceId = 0;
 	
-	private void getTweet(String topic, int topicIndex) 
+	private void getTweet(String topic) 
 	{
 		// creating the query for the given topic
 		// setting the number of results we want
