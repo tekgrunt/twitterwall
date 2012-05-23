@@ -1,12 +1,12 @@
 #Fat Jar Configuration File
-#Fri Feb 10 07:51:48 PST 2012
+#Wed May 23 01:37:03 PDT 2012
 onejar.license.required=true
 manifest.classpath=
 manifest.removesigners=true
 onejar.checkbox=false
-jarname=TwitterWall_Present.jar
+jarname=twitterwall_DATABASENOTWORKING.jar
 manifest.mergeall=true
-manifest.mainclass=Calling
+manifest.mainclass=twitterwall.core.Calling
 manifest.file=<createnew>
 jarname.isextern=false
 onejar.expand=

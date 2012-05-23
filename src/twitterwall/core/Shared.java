@@ -10,7 +10,7 @@ package twitterwall.core;
 public class Shared 
 {
 	public static long FIRST = -1;
-	public static boolean LOCAL_DB_ENABLED = false;
+	public static boolean LOCAL_DB_ENABLED = true;
 
 	public static final int Width = 1024;
 	public static final int Height = 768;
@@ -22,7 +22,7 @@ public class Shared
 	public static final int IconSize = 48;
 	public static final int BackgroundSwitchAmount = 10;
 	
-	public static boolean WEBSERVICE_ENABLED = true;
+	public static boolean WEBSERVICE_ENABLED = false;
 	
 	public static String ADMIN_USER = "yaletown2012";
 	public static String ADMIN_TAG = "#admintwm2o";

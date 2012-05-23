@@ -17,6 +17,7 @@ public class Renderer
 	private PImage bg;	
 	private PImage bannerImage;
 	private PImage restricted;
+	private PImage welcome;
 	
 	
 	private boolean showBackground = true;
@@ -33,6 +34,7 @@ public class Renderer
 
 	private LinkedList<PImage> backgrounds = new LinkedList<PImage>();
 	private boolean censored;
+	private boolean showWelcome;
 	
 	public Renderer(Calling p)
 	{
@@ -43,8 +45,10 @@ public class Renderer
 		buildSourceMap();
 		loadBackgrounds();
 		bg = backgrounds.get(0);
-		bannerImage = p.loadLocalImage("m2o_banner2.png");
+		bannerImage = p.loadLocalImage("bcama_banner.gif");
 		restricted = p.loadLocalImage("oops.jpg");
+		welcome = p.loadLocalImage("welcome.jpg");
+
 	}
 	
 	public HashMap<String, Color> getColorMap()
@@ -79,14 +83,16 @@ public class Renderer
 		}
 		if(backgrounds.size() == 0)
 		{
-			backgrounds.add(p.loadLocalBackground("02182_campmeekerwaterfall_1024x768.jpg"));
-			backgrounds.add(p.loadLocalBackground("01665_streamssun_1024x768.jpg"));
-			backgrounds.add(p.loadLocalBackground("02110_lowerfallsyellowstone_1024x768.jpg"));
-			backgrounds.add(p.loadLocalBackground("02118_waterfall_1024x768.jpg"));
-			backgrounds.add(p.loadLocalBackground("02174_gazeduponbyangelsintheirflight_1024x768.jpg"));
-			backgrounds.add(p.loadLocalBackground("02291_yosemitefalls_1024x768.jpg"));
-			backgrounds.add(p.loadLocalBackground("02414_blackforest_1024x768.jpg"));
-			backgrounds.add(p.loadLocalBackground("02449_burneyfalls_1024x768.jpg"));
+			backgrounds.add(p.loadLocalBackground("water13_1024X768.jpg"));
+			backgrounds.add(p.loadLocalBackground("water12_1024X768.jpg"));
+			backgrounds.add(p.loadLocalBackground("water9_1024X768.jpg"));
+			backgrounds.add(p.loadLocalBackground("water5_1024X768.jpg"));
+			backgrounds.add(p.loadLocalBackground("water2_1024X768.jpg"));
+			backgrounds.add(p.loadLocalBackground("water18_1024X768.jpg"));
+			backgrounds.add(p.loadLocalBackground("water17_1024X768.jpg"));
+			backgrounds.add(p.loadLocalBackground("water16_1024X768.jpg"));
+			backgrounds.add(p.loadLocalBackground("water15_1024X768.jpg"));
+			backgrounds.add(p.loadLocalBackground("water14_1024X768.jpg"));
 		}
 	}
 	
@@ -213,6 +219,10 @@ public class Renderer
 		{
 			p.image(restricted, 100, 120);
 		}
+		if(showWelcome)
+		{
+			p.image(welcome, 0, 0);
+		}
 		renderQuestion();
 	}
 
@@ -250,7 +260,7 @@ public class Renderer
 				this.p.stroke(250, 250, 250);
 				p.rect(65, 16, 890, 60);
 				this.p.fill(250, 250, 250);
-				p.text("Question: " + question.getQuestionText(), 80, 24, 870, 50);
+				p.text(question.getQuestionText(), 80, 24, 870, 50);
 			}
 		}
 	}
@@ -293,5 +303,9 @@ public class Renderer
 	public void toggleCensor() 
 	{
 		censored = !censored;
+	}
+	public void toggleWelcome() 
+	{
+		showWelcome = !showWelcome;
 	}
 }

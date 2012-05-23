@@ -41,6 +41,7 @@ public class Calling extends PApplet
 	private static HashMap<String, IMovingImage> imageMap;
 	
 	public boolean censor = false;
+	public boolean showWelcome = false;
 	
 	private static int TotalTweetCount = 0;
 	private static int RenderedTweetCount = 0;
@@ -51,6 +52,8 @@ public class Calling extends PApplet
 	private static Pattern instagramURLPattern = Pattern.compile("og:image\" content=\"([^\"]+)", Pattern.MULTILINE);
 	
 	private ArrayList<Question> listOfQuestions = new ArrayList<Question>();
+	
+	private boolean disableImages = false;
 
 	/*
 	 * The setup() function is a processing method that runs once when the application is booted.
@@ -65,7 +68,23 @@ public class Calling extends PApplet
 		buildImageMap();
 		frameRate(30);
 		size(Shared.Width, Shared.Height);
-		listOfQuestions.add(new Question("How much wood could a woodchuck chuck if a woodchuck could chuck wood?? How much wood could a woodchuck chuck if a woodchuck could chuck wood??", "love"));
+		listOfQuestions.add(new Question("Enter the #bcamavision contest to win “Basket of Success” prize pack, incl @BCBusiness Magazine membership & several books written by best-selling author @_peterlegge", "1lwyehflkshdlfkjsldfkgasd"));
+		listOfQuestions.add(new Question("Find a BCAMA member who has been a member for at least 5 yrs & tag them in a tweet for a chance to win!", "1lwyehflkshdlfkjsldfkgasd"));
+		listOfQuestions.add(new Question("Only 10 more mins for a chance to win! Tag a BCAMA member who has been a member for at least 5 yrs.", "1lwyehflkshdlfkjsldfkgasd"));
+		listOfQuestions.add(new Question("Question #2 for the#bcamavision twitter contest coming up. Must answer question b/t 10:30 and 11am", "1lwyehflkshdlfkjsldfkgasd"));
+		listOfQuestions.add(new Question("Name 1 of the 13 powerful reasons to be a BCAMA member (as listed on our website.) #bcamavision", "1lwyehflkshdlfkjsldfkgasd"));
+		listOfQuestions.add(new Question("Twitter Contest Hint: Answers can be found at the Membership booth. #bcamavision", "1lwyehflkshdlfkjsldfkgasd"));
+		listOfQuestions.add(new Question("Question #3 for the #bcamavision twitter contest coming up. Must answer question b/t 12 and 12:30pm", "1lwyehflkshdlfkjsldfkgasd"));
+		listOfQuestions.add(new Question("Name a @BCAMA Sponsor that is providing our members discounts for their services/ products. #bcamavision", "1lwyehflkshdlfkjsldfkgasd"));
+		listOfQuestions.add(new Question("Twitter Contest Hint: Answers can be found at the Members Lounge. #bcamavision", "1lwyehflkshdlfkjsldfkgasd"));
+		listOfQuestions.add(new Question("Question #4 for the #bcamavision twitter contest coming up. Must answer question b/t 12:30 and 1pm", "1lwyehflkshdlfkjsldfkgasd"));
+		listOfQuestions.add(new Question("Tag four BCAMA members in a tweet. #bcamavision", "1lwyehflkshdlfkjsldfkgasd"));
+		listOfQuestions.add(new Question("#bcamavision contest to win a @BCBusiness Magazine membership & books written by best-selling author @_peterlegge. Must answer question b/t 3 and 3:30pm", "1lwyehflkshdlfkjsldfkgasd"));
+		listOfQuestions.add(new Question("The winner of the #bcamavision twitter contest will be announced at the After Party at 5:30, and must be present to claim their “Basket of Success” prize pack.", "1lwyehflkshdlfkjsldfkgasd"));
+
+
+
+
 	}
 	
 	/*
@@ -83,31 +102,34 @@ public class Calling extends PApplet
 	
 	private void partyTime(String word)
 	{
-		word = word.replace("#", "");
-		boolean isParty = word.contains("party");
-		if(isParty)
+		if(!disableImages)
 		{
-			word = word.replace("party", "");
-		}
-		if(imageMap.containsKey(word))
-		{
-			IMovingImage image = imageMap.get(word);
-			int partySize = isParty ? (int)(Math.random() * 5) + 5 : 1;
-			for(int i = 0 ; i < partySize ; i++)
+			word = word.replace("#", "");
+			boolean isParty = word.contains("party");
+			if(isParty)
 			{
-				if(image.getClass() == FlyingImage.class)
+				word = word.replace("party", "");
+			}
+			if(imageMap.containsKey(word))
+			{
+				IMovingImage image = imageMap.get(word);
+				int partySize = isParty ? (int)(Math.random() * 5) + 5 : 1;
+				for(int i = 0 ; i < partySize ; i++)
 				{
-					imageQueue.add(new FlyingImage(image.getImage()));
-				}
-				else
-				{
-					if(((FallingImage)image).isFullScreen())
+					if(image.getClass() == FlyingImage.class)
 					{
-						imageQueue.add(new FallingImage(image.getImage(), "random"));
+						imageQueue.add(new FlyingImage(image.getImage()));
 					}
 					else
 					{
-						imageQueue.add(new FallingImage(image.getImage()));
+						if(((FallingImage)image).isFullScreen())
+						{
+							imageQueue.add(new FallingImage(image.getImage(), "random"));
+						}
+						else
+						{
+							imageQueue.add(new FallingImage(image.getImage()));
+						}
 					}
 				}
 			}
@@ -134,21 +156,15 @@ public class Calling extends PApplet
 		imageMap = new HashMap<String, IMovingImage>();
 		imageMap.put("cat", new FallingImage(loadLocalImage("fallingcat.png")));
 		imageMap.put("anvil", new FallingImage(loadLocalImage("anvil.png")));
-		imageMap.put("dog", new FallingImage(loadLocalImage("dog.png")));
-		imageMap.put("squirrel", new FallingImage(loadLocalImage("squirrel.png")));
-		imageMap.put("rainbow", new FallingImage(loadLocalImage("rainbow.png")));
 		imageMap.put("fish", new FlyingImage(loadLocalImage("fish.png")));
 		imageMap.put("<3", new FallingImage(loadLocalImage("heart.png")));
+		imageMap.put("love", new FallingImage(loadLocalImage("heart.png")));
 		imageMap.put("madmen", new FallingImage(loadLocalImage("madmen.png")));
 		imageMap.put("pigsfly", new FlyingImage(loadLocalImage("pigsFly.png")));
 		imageMap.put("shark", new FlyingImage(loadLocalImage("sharkparty.png")));
+		imageMap.put("liquid", new FallingImage(loadLocalImage("earthdrop.png")));
+		imageMap.put("water", new FallingImage(loadLocalImage("earthdrop.png")));
 		imageMap.put("confetti", new FallingImage(loadLocalImage("confetti.png"), "random"));
-		
-		imageMap.put("and", new FallingImage(loadLocalImage("dog.png")));
-		imageMap.put("if", new FlyingImage(loadLocalImage("sharkparty.png")));
-		imageMap.put("to", new FlyingImage(loadLocalImage("fish.png")));
-		imageMap.put("so", new FallingImage(loadLocalImage("squirrel.png")));
-		
 	}
 	
 	public PImage loadLocalBackground(String name)
@@ -396,71 +412,212 @@ public class Calling extends PApplet
 				currentQuestion = null;
 			}
 		}
-		if (key == 'b')
+		if (key == '2')
+		{
+			if(currentQuestion == null)
+			{
+				currentQuestion = listOfQuestions.get(1);
+			}
+			else
+			{
+				currentQuestion = null;
+			}
+		}
+		if (key == '3')
+		{
+			if(currentQuestion == null)
+			{
+				currentQuestion = listOfQuestions.get(2);
+			}
+			else
+			{
+				currentQuestion = null;
+			}
+		}
+		if (key == '4')
+		{
+			if(currentQuestion == null)
+			{
+				currentQuestion = listOfQuestions.get(3);
+			}
+			else
+			{
+				currentQuestion = null;
+			}
+		}
+		if (key == '5')
+		{
+			if(currentQuestion == null)
+			{
+				currentQuestion = listOfQuestions.get(4);
+			}
+			else
+			{
+				currentQuestion = null;
+			}
+		}
+		if (key == '6')
+		{
+			if(currentQuestion == null)
+			{
+				currentQuestion = listOfQuestions.get(5);
+			}
+			else
+			{
+				currentQuestion = null;
+			}
+		}
+		if (key == '7')
+		{
+			if(currentQuestion == null)
+			{
+				currentQuestion = listOfQuestions.get(6);
+			}
+			else
+			{
+				currentQuestion = null;
+			}
+		}
+		if (key == '8')
+		{
+			if(currentQuestion == null)
+			{
+				currentQuestion = listOfQuestions.get(7);
+			}
+			else
+			{
+				currentQuestion = null;
+			}
+		}
+		if (key == '9')
+		{
+			if(currentQuestion == null)
+			{
+				currentQuestion = listOfQuestions.get(8);
+			}
+			else
+			{
+				currentQuestion = null;
+			}
+		}
+		if (key == 'q')
+		{
+			if(currentQuestion == null)
+			{
+				currentQuestion = listOfQuestions.get(9);
+			}
+			else
+			{
+				currentQuestion = null;
+			}
+		}
+		if (key == 'w')
+		{
+			if(currentQuestion == null)
+			{
+				currentQuestion = listOfQuestions.get(10);
+			}
+			else
+			{
+				currentQuestion = null;
+			}
+		}
+		if (key == 'e')
+		{
+			if(currentQuestion == null)
+			{
+				currentQuestion = listOfQuestions.get(11);
+			}
+			else
+			{
+				currentQuestion = null;
+			}
+		}
+		if (key == 'r')
+		{
+			if(currentQuestion == null)
+			{
+				currentQuestion = listOfQuestions.get(12);
+			}
+			else
+			{
+				currentQuestion = null;
+			}
+		}
+		if (key == 't')
 		{
 			renderer.toggleBackground();
 		}
-		if (key == 'c')
+		if(key == 'y')
 		{
-			partyTime("cat");
+			renderer.toggleCensor();
 		}
+		if(key == 'u')
+		{
+			renderer.toggleWelcome();
+		}
+		if(key == 'i')
+		{
+			System.gc();
+		}
+		if(key == 'o')
+		{
+			partyTime("sharkparty");
+		}
+		
+		if (key == 'p')
+		{
+			partyTime("catparty");
+		}
+
 		if (key == 'a')
 		{
 			partyTime("anvil");
 		}
-		if(key == 'm')
+		if(key == 's')
 		{
 			partyTime("madmen");
 		}
-		if(key == 'x')
-		{
-			renderer.toggleCensor();
-		}
-		if(key == 'k')
+		if(key == 'd')
 		{
 			partyTime("cat");
 		}
-		if(key == 'p')
-		{
-			partyTime("pigsfly");
-		}
-		if(key == 'h')
-		{
-			partyTime("heart");
-		}
 		if(key == 'f')
 		{
-			partyTime("fish");
-		}
-		if(key == 's')
-		{
-			partyTime("sharkparty");
-		}
-		if(key == 'r')
-		{
-			partyTime("rainbow");
-		}
-		if(key == 'd')
-		{
-			partyTime("dog");
-		}
-		if(key == 'n')
-		{
-			partyTime("squirrel");
-		}
-		if(key == 'q')
-		{
-			currentQuestion = null;
-		}
-		if(key == 'e')
-		{
-			allTweets.clear();
-			imageQueue.clear();
+			partyTime("pigsflyparty");
 		}
 		if(key == 'g')
 		{
-			System.gc();
+			partyTime("love");
 		}
+		if(key == 'h')
+		{
+			partyTime("fish");
+		}
+		if(key == 'j')
+		{
+			partyTime("shark");
+		}
+		if(key == 'k')
+		{
+			partyTime("confettiparty");
+		}
+		if(key == 'l')
+		{
+			partyTime("liquid");
+		}
+		if(key == 'z')
+		{
+			if(disableImages)
+			{
+				disableImages = false;
+			}
+			else
+			{
+				disableImages = true;
+			}
+		}
+
 	}		  
 }
 

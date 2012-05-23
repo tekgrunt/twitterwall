@@ -34,7 +34,7 @@ public class TwitterBox
 	protected String second = "";
 	private String colorToken = "white";
 	
-	private static Pattern cursingFilter = Pattern.compile("fuck|cunt|shit", Pattern.CASE_INSENSITIVE);
+	private static Pattern cursingFilter = Pattern.compile("fuck|cunt|shit|bitch|nigger|nigga|chink|asshole", Pattern.CASE_INSENSITIVE);
 	
 	public PImage getUserImage() 
 	{

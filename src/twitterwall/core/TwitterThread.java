@@ -54,8 +54,10 @@ public class TwitterThread extends Thread
 		myTwitter = new TwitterFactory().getInstance();
 		myTwitter.setOAuthConsumer("DataVisual", "m2blowme2012");	
 
-		topics.add("beautiful");
-		
+		topics.add("bcama");
+		topics.add("bcamavision");
+		topics.add("m2o");
+
 		long startTime = System.currentTimeMillis();
 		
 		while(true)
@@ -104,9 +106,7 @@ public class TwitterThread extends Thread
 			//getting the tweets
 			result = myTwitter.search(query);
 			List<Tweet> tweets = result.getTweets();
-			
-			System.out.println("Number of tweets: " + tweets.size() + " for topic " + topic);
-			
+						
 			for(Tweet t : tweets)
 			{
 				filterSinceId = Math.max(t.getId(), filterSinceId);
@@ -140,7 +140,7 @@ public class TwitterThread extends Thread
 	{
 		if(Shared.LOCAL_DB_ENABLED)
 		{
-		//	dataConnection.enterTweetData(t);
+			dataConnection.enterTweetData(t);
 		}
 		
 		if(Shared.WEBSERVICE_ENABLED)
