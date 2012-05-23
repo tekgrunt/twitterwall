@@ -10,7 +10,7 @@ package twitterwall.core;
 public class Shared 
 {
 	public static long FIRST = -1;
-	public static boolean LOCAL_DB_ENABLED = true;
+	public static boolean LOCAL_DB_ENABLED = false;
 
 	public static final int Width = 1024;
 	public static final int Height = 768;

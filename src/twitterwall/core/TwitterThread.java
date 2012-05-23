@@ -54,10 +54,18 @@ public class TwitterThread extends Thread
 		myTwitter = new TwitterFactory().getInstance();
 		myTwitter.setOAuthConsumer("DataVisual", "m2blowme2012");	
 
-		topics.add("bcama");
-		topics.add("bcamavision");
-		topics.add("m2o");
+		//topics.add("bcama");
+		//topics.add("bcamavision");
+		//topics.add("m2o");
 
+		topics.add("#bcama");
+		topics.add("#bcamavision");
+		topics.add("#m2o");
+		
+		topics.add("@bcama");
+		topics.add("@bcamavision");
+		topics.add("@m2o");
+		
 		long startTime = System.currentTimeMillis();
 		
 		while(true)
@@ -100,7 +108,7 @@ public class TwitterThread extends Thread
 		// setting the number of results we want
 		query = new Query(topic);
 		query.setSinceId(filterSinceId);
-		query.setRpp(4);	
+		query.setRpp(100);	
 		try 
 		{
 			//getting the tweets
